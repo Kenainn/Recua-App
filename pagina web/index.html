@@ -16,130 +16,137 @@
   <h1>Recua Dashboard</h1>
 </nav>
 
-<div class="dashboard">
-
+<!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
-  <ul>
-    <li><i data-lucide="book-open"></i> Materias</li>
-    <li><i data-lucide="check-square"></i> Tareas</li>
-    <li><i data-lucide="trending-up"></i> Progreso</li>
-  </ul>
-
-  
-  <div class="user-sidebar" id="userSidebar">
-    <div class="user-main">
-      <img src="./img/user.png" alt="Usuario" class="user-img">
-      <p id="sidebar-username-main">Kenai</p>
+  <ul></ul>
+  <hr>
+  <!-- Perfil dentro del sidebar -->
+  <div class="user-sidebar">
+    <div class="user-main" id="userMain">
+      <img src="../img/pfp prueba.jpg" alt="Usuario" class="user-img">
+      <p id="sidebar-username-main">Kenai Flores</p>
     </div>
     <div class="user-info-sidebar" id="userInfoSidebar">
-      <p id="sidebar-username">Kenai</p>
-      <p id="sidebar-email">kenai@example.com</p>
+      <p id="sidebar-username">Kenai Flores</p>
+      <p id="sidebar-email">kevinyedwin388@gmail.com</p>
+      <p id="sidebar-role">Profesor</p>
       <button id="logout-btn">Cerrar Sesión</button>
     </div>
   </div>
-
-  
   <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
 </aside>
 
-  
-  <main class="main">
+<!-- Main content -->
+<main class="main">
 
-    
-    <section class="streak">
-      <div class="streak-header">
-        <h1>¡Hola, <span id="username">Kenai</span>! 👋</h1>
-        <p class="streak-subtitle">¿Listo para seguir aprendiendo con Yak?</p>
+  <!-- Streak / Yak -->
+  <section class="streak">
+    <div class="streak-header">
+      <h1>¡Hola, <span id="username">Kenai</span>! 👋</h1>
+      <p class="streak-subtitle">¿Listo para seguir aprendiendo con Yak?</p>
+    </div>
+    <div class="streak-cards horizontal-layout">
+      <div class="card yak-card">
+        <div class="yak-bg">
+          <div class="yak-level" id="yak-level">1</div>
+          <img src="../recuaimg/fondo/YAK BASE.png" alt="Yak">
+        </div>
+        <div class="yak-exp-bar">
+          <div class="exp-fill" id="exp-fill"></div>
+        </div>
+        <p class="exp-text" id="exp-text">0 / 200 exp</p>
+      </div>
+      
+      <div class="card white-card horizontal-card">
+        <div class="stat horizontal">
+          <i data-lucide="flame" style="color:orange;"></i>
+          <div><span id="current-streak">0</span> Racha Actual</div>
+        </div>
+        <div class="stat horizontal">
+          <i data-lucide="award" style="color:gold;"></i>
+          <div><span id="best-streak">0</span> Mejor Racha</div>
+        </div>
       </div>
 
-      <div class="streak-cards horizontal-layout">
-        
-        <div class="card yak-card">
-          <div class="yak-bg">
-            <img src="./img/yak.png" alt="Yak">
-            <div class="yak-level" id="yak-level">1</div>
-          </div>
-          <div class="yak-exp-bar">
-            <div class="exp-fill" id="exp-fill"></div>
-          </div>
-          <p class="exp-text" id="exp-text">0 / 200 exp</p>
-        </div>
-
-        
-        <div class="card white-card horizontal-card">
-          <div class="stat horizontal">
-            <i data-lucide="flame" style="color:orange;"></i>
-            <div><span id="current-streak">0</span> Racha Actual</div>
-          </div>
-          <div class="stat horizontal">
-            <i data-lucide="award" style="color:gold;"></i>
-            <div><span id="best-streak">0</span> Mejor Racha</div>
-          </div>
-        </div>
-
-        
-        <div class="card white-card horizontal-card">
-          <div class="stat horizontal">
-            <i data-lucide="book-open" style="color:#2196f3;"></i>
-            <div><span id="subjects-count">0</span> Materias Activas</div>
-          </div>
-        </div>
-
-        
-        <div class="card white-card horizontal-card">
-          <div class="stat horizontal">
-            <i data-lucide="check-square" style="color:green;"></i>
-            <div><span id="tasks-progress">0</span> Tareas Completadas</div>
-          </div>
+      <div class="card white-card horizontal-card">
+        <div class="stat horizontal">
+          <i data-lucide="book-open" style="color:#2196f3;"></i>
+          <div><span id="subjects-count">0</span> Materias Activas</div>
         </div>
       </div>
-    </section>
 
-    
-    <div class="dashboard-lower" style="display:flex; gap:16px; flex-wrap:wrap;">
-      
-      
-      <div class="tasks-board" style="flex:2">
-        <h2><i data-lucide="calendar" style="color:green;"></i> Tareas de hoy</h2>
-        <div class="tasks-board-content" id="tasks-today">
-          <i data-lucide="check-square" style="color:green; font-size:24px;"></i>
-          <p>No tienes tareas para hoy</p>
+      <div class="card white-card horizontal-card">
+        <div class="stat horizontal">
+          <i data-lucide="check-square" style="color:green;"></i>
+          <div><span id="tasks-progress">0</span> Tareas Completadas</div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lower dashboard -->
+  <div class="dashboard-lower" style="display:flex; gap:16px; flex-wrap:wrap; margin-top:20px;">
+
+    <!-- Tablon de tareas -->
+    <div class="tasks-board" style="flex:2; display:flex; flex-direction:column;">
+      <h2 style="display:flex; justify-content:space-between; align-items:center;">
+        <span><i data-lucide="calendar" style="color:green;"></i> Tareas de hoy</span>
+      </h2>
+      <!-- Contenedor de tarjetas de tareas -->
+      <div id="tasks-today" class="tasks-today-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+        <!-- Las tareas se inyectarán dinámicamente -->
+      </div>
+      <!-- Boton ver todas a la derecha -->
+      <div style="display:flex; justify-content:flex-end; margin-top:8px;">
         <button class="btn-green">Ver todas las tareas</button>
-      </div>
-
-      
-      <div class="right-cards" style="flex:1; display:flex; flex-direction:column; gap:16px;">
-        
-    
-        <div class="card white-card">
-          <h3>Próximas Tareas</h3>
-          <ul id="upcoming-tasks" style="list-style:none; padding:0; margin:0;">
-            <li><span style="color:#ff9800;">•</span> Proyecto de química - Prof. Ruiz</li>
-            <li><span style="color:#4caf50;">•</span> Ensayo de historia - Prof. Gómez</li>
-          </ul>
-        </div>
-
-        
-        <div class="card white-card">
-          <h3>Mis Materias</h3>
-          <ul id="my-subjects" style="list-style:none; padding:0; margin:0;">
-            <li><span style="background:#f44336; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Matemáticas - Prof. López</li>
-            <li><span style="background:#2196f3; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Español - Prof. Sánchez</li>
-            <li><span style="background:#ffeb3b; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Física - Prof. Ramírez</li>
-          </ul>
-        </div>
-
       </div>
     </div>
 
-    
-    <section class="tasks" id="tasks-container"></section>
-  </main>
-</div>
+    <!-- Recuadros derecho -->
+    <div class="right-cards" style="flex:1; display:flex; flex-direction:column; gap:16px;">
+      <div class="card white-card">
+        <h3>Próximas Tareas</h3>
+        <ul id="upcoming-tasks" style="list-style:none; padding:0; margin:0;">
+          <li><span style="color:#ff9800;">•</span> Proyecto de química - Prof. Ruiz</li>
+          <li><span style="color:#4caf50;">•</span> Ensayo de historia - Prof. Gómez</li>
+        </ul>
+      </div>
 
+      <div class="card white-card">
+        <h3>Mis Materias</h3>
+        <ul id="my-subjects" style="list-style:none; padding:0; margin:0;">
+          <li><span style="background:#f44336; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Matemáticas - Prof. López</li>
+          <li><span style="background:#2196f3; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Español - Prof. Sánchez</li>
+          <li><span style="background:#ffeb3b; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Física - Prof. Ramírez</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
 
+<!-- Scripts -->
 <script src="./js/scripts.js"></script>
-<script>lucide.createIcons();</script>
+<script>
+  lucide.createIcons();
+
+  // Simular tareas en el tablon
+  const tasksTodayContainer = document.getElementById('tasks-today');
+  const tasksToday = [
+    { title: "Ensayo de literatura", subject: "Español", date: "29/10/2025" },
+    { title: "Proyecto de física", subject: "Ciencias", date: "29/10/2025" },
+    { title: "Problema de matemáticas", subject: "Matemáticas", date: "29/10/2025" }
+  ];
+
+  tasksToday.forEach(task => {
+    const div = document.createElement('div');
+    div.classList.add('task-card');
+    div.style.padding = "10px";
+    div.style.borderRadius = "12px";
+    div.style.background = "white";
+    div.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+    div.innerHTML = `<strong>${task.title}</strong><br><span>${task.subject}</span><br><small>${task.date}</small>`;
+    tasksTodayContainer.appendChild(div);
+  });
+</script>
 </body>
 </html>

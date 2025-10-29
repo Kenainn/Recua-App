@@ -7,6 +7,7 @@
   --white: #ffffff;
 }
 
+/* === GENERAL === */
 body {
   font-family: 'Poppins', sans-serif;
   background-color: var(--background);
@@ -15,7 +16,7 @@ body {
   padding: 0;
 }
 
-/* Navbar */
+/* === NAVBAR === */
 .navbar {
   background: linear-gradient(90deg, var(--primary), var(--secondary));
   color: var(--white);
@@ -25,11 +26,10 @@ body {
   padding: 12px 24px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-
 .navbar h1 { font-size: 1.5rem; }
 .sidebar-toggle { background:none; border:none; cursor:pointer; color:white; }
 
-/* Sidebar */
+/* === SIDEBAR === */
 .sidebar {
   width:240px;
   background-color: var(--white);
@@ -40,18 +40,12 @@ body {
   top:0;
   left:-260px;
   transition:0.3s;
+  z-index: 999;
 }
-.sidebar.active { left:0; }
+.sidebar.active { left:0; box-shadow:4px 0 15px rgba(0,0,0,0.15); }
 .sidebar ul { list-style:none; padding:0; margin:0; }
 .sidebar li { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:background 0.3s; }
 .sidebar li:hover { background-color: rgba(128, 203, 196, 0.3); }
-
-/* Usuario barra lateral */
-.user-sidebar {
-  position: absolute;
-  bottom: 20px;
-  width: calc(100% - 20px);
-}
 
 .sidebar-close {
   background: none;
@@ -66,13 +60,12 @@ body {
   border-radius: 8px;
   transition: background 0.2s;
 }
+.sidebar-close:hover { background: rgba(0,0,0,0.05); }
 
-.sidebar-close:hover {
-  background: rgba(0,0,0,0.05);
-}
+/* === USER SIDEBAR === */
+.user-sidebar { position: absolute; bottom: 20px; width: calc(100% - 20px); }
 .user-main { display:flex; align-items:center; gap:8px; cursor:pointer; }
 .user-img { width:40px; height:40px; border-radius:50%; }
-
 .user-info-sidebar {
   display:none;
   flex-direction: column;
@@ -91,18 +84,13 @@ body {
   transform:translateY(10px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
-.user-sidebar.active .user-info-sidebar {
-  display:flex;
-  opacity:1;
-  transform:translateY(0);
-}
+.user-sidebar.active .user-info-sidebar { display:flex; opacity:1; transform:translateY(0); }
 #logout-btn { background:none; color:red; border:none; cursor:pointer; margin-top:4px; font-weight:bold; }
 
-/* Main */
+/* === MAIN === */
 .main { margin-left:260px; padding:24px; }
 
-/* Racha */
-.streak { margin-bottom:24px; }
+/* === STREAK / YAK === */
 .streak-header h1 { font-size:1.8rem; margin:0; }
 .streak-header .streak-subtitle { color:gray; margin:4px 0 16px 0; }
 .horizontal-layout { display:flex; gap:16px; flex-wrap:wrap; }
@@ -110,7 +98,6 @@ body {
 .white-card { background:white; }
 .horizontal-card .stat { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
 
-/* Yak */
 .yak-card { text-align:center; width:180px; }
 .yak-bg { position:relative; }
 .yak-bg img { width:80px; height:80px; }
@@ -119,8 +106,101 @@ body {
 .exp-fill { height:100%; background:var(--secondary); width:0%; transition:0.3s; }
 .exp-text { margin-top:4px; font-size:0.8rem; }
 
-/* Tareas */
+/* === TASKS BOARD === */
 .tasks-board, .right-cards .card { padding:16px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
 .tasks-board h2, .right-cards h3 { display:flex; align-items:center; gap:8px; }
 .btn-green { background:var(--secondary); color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; margin-top:8px; }
 
+/* === DASHBOARD LOWER: espacio entre tarjetas === */
+.dashboard-lower {
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px;
+  margin-top:16px;
+}
+
+/* Contenedor de tarjetas de la derecha */
+.right-cards {
+  flex:1 1 35%;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+/* Tablero de tareas */
+.tasks-board {
+  flex:2 1 60%;
+  background-color: var(--white);
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  min-height:200px;
+}
+
+/* Limitar altura de listas largas */
+#upcoming-tasks, #my-subjects {
+  max-height:200px;
+  overflow-y:auto;
+  padding-right:8px;
+}
+
+/* Separación entre streak y tarjetas inferiores */
+.streak-cards { margin-bottom:24px; }
+
+/* === MATERIAS / TAREAS === */
+.materias-header, .evaluaciones-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; }
+.materias-header h1, .evaluaciones-header h1 { font-size:1.8rem; color: var(--secondary); margin:0; }
+.materias-header p, .evaluaciones-header p { margin: 4px 0 0; color: gray; }
+
+.materias-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:20px; }
+.materia-card { background: var(--white); border-radius:16px; padding:16px; box-shadow:0 3px 8px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:10px; transition: transform 0.2s ease; }
+.materia-card:hover { transform: translateY(-3px); }
+.materia-header { display:flex; justify-content:space-between; align-items:center; }
+.materia-title { display:flex; align-items:center; gap:10px; }
+.materia-title h3 { margin:0; font-size:1.2rem; color: var(--text); }
+.materia-icon { width:40px; height:40px; border-radius:50%; display:flex; justify-content:center; align-items:center; }
+.materia-actions i { cursor:pointer; margin-left:8px; color:gray; transition: color 0.2s; }
+.materia-actions i:hover { color: var(--secondary); }
+.materia-profesor { display:flex; align-items:center; gap:6px; color:gray; font-size:0.9rem; }
+.materia-desc { margin:4px 0; font-size:0.95rem; color:#444; }
+.materia-calendario { background-color: var(--background); border-radius:8px; padding:8px 10px; font-size:0.9rem; color:#333; }
+.materia-footer { display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:6px; }
+.materia-estado { padding:6px 12px; border-radius:8px; font-weight:600; font-size:0.85rem; color:white; }
+.estado-activa { background-color: var(--secondary); }
+.estado-inactiva { background-color: #b0bec5; }
+.materia-fecha { font-size:0.85rem; color:gray; }
+.hidden { display:none; }
+
+/* === EVALUACIONES === */
+.evaluaciones-container { background: var(--white); border-radius:16px; padding:24px; box-shadow:0 3px 8px rgba(0,0,0,0.1); max-width:1000px; margin:0 auto; }
+.search-bar { display:flex; align-items:center; gap:10px; }
+.search-bar input { padding:10px 14px; border:2px solid var(--accent); border-radius:10px; outline:none; font-family:'Poppins',sans-serif; font-size:0.95rem; transition:0.3s; width:250px; }
+.search-bar input:focus { border-color:var(--secondary); box-shadow:0 0 6px rgba(0,105,92,0.3); }
+.search-bar button { background-color:var(--secondary); color:white; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:500; transition:0.2s; }
+.search-bar button:hover { background-color: var(--primary); transform: scale(1.05); }
+.table-wrapper { overflow-x:auto; border-radius:12px; box-shadow:0 3px 8px rgba(0,0,0,0.08); }
+.evaluaciones-table { width:100%; border-collapse:collapse; font-size:0.95rem; background:var(--white); }
+.evaluaciones-table th { background: var(--accent); color: var(--secondary); padding:12px 16px; text-align:left; font-weight:600; }
+.evaluaciones-table td { padding:10px 16px; border-bottom:1px solid #ddd; color: var(--text); }
+.evaluaciones-table tr:hover { background-color: rgba(128,203,196,0.2); transition:0.2s; }
+.grade-input { width:70px; padding:6px; border-radius:8px; border:1.5px solid var(--accent); outline:none; transition:0.3s; text-align:center; }
+.grade-input:focus { border-color:var(--secondary); box-shadow:0 0 6px rgba(0,105,92,0.3); }
+.save-btn { background-color: var(--secondary); color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; transition:0.2s; }
+.save-btn:hover { background-color: var(--primary); transform: scale(1.05); }
+.promedio-container { margin-top:24px; background: var(--background); padding:16px; border-radius:12px; text-align:center; color: var(--text); }
+.promedio-container h3 { margin:0; color: var(--secondary); font-size:1.1rem; }
+.promedio-container span { font-weight:bold; color: var(--primary); font-size:1.2rem; }
+
+/* === DOTS PARA LISTAS === */
+.task-dot, .subject-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.task-dot.orange { background-color:#ff9800; }
+.task-dot.green { background-color:#4caf50; }
+.subject-dot.red { background-color:#f44336; }
+.subject-dot.blue { background-color:#2196f3; }
+.subject-dot.yellow { background-color:#ffeb3b; }

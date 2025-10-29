@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluaciones | Recua</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/style.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+<!-- Navbar con botón de 3 rayas -->
+<nav class="navbar">
+  <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+  <h1>Evaluaciones</h1>
+</nav>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <ul>
+    <!-- Ítems se generan desde JS general, incluyendo Home/Main -->
+  </ul>
+
+  <!-- User Sidebar -->
+  <div class="user-sidebar" id="userSidebar">
+    <div class="user-main">
+      <img src="./img/user.png" alt="Usuario" class="user-img">
+      <p id="sidebar-username-main">Kenai Flores</p>
+    </div>
+    <div class="user-info-sidebar" id="userInfoSidebar">
+      <p id="sidebar-username">Kenai Flores</p>
+      <p id="sidebar-email">kevinyedwin388@gmail.com</p>
+      <button id="logout-btn">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+</aside>
+
+<!-- Contenido principal -->
+<main class="main">
+  <div id="current-screen">Evaluaciones</div>
+  <h1>Gestión de Evaluaciones</h1>
+  <p>Busca un alumno por su boleta para revisar, calificar y ver su promedio general.</p>
+
+  <!-- Buscador de alumno -->
+  <div class="evaluaciones-section">
+    <div class="search-bar">
+      <input type="text" id="boleta-input" placeholder="Buscar alumno por boleta...">
+      <button class="btn-primary" id="buscar-alumno">Buscar</button>
+    </div>
+
+    <!-- Información del alumno -->
+    <div id="alumno-info" class="card" style="display:none;">
+      <h2 id="nombre-alumno"></h2>
+      <p id="boleta-alumno"></p>
+      <hr>
+
+      <h3>Tareas Entregadas</h3>
+      <table class="tabla-tareas" id="tabla-evaluaciones">
+        <thead>
+          <tr>
+            <th>Tarea</th>
+            <th>Calificación</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="promedios">
+        <h3>Resumen de Calificaciones</h3>
+        <p>Primer Parcial: <strong id="parcial1">-</strong></p>
+        <p>Segundo Parcial: <strong id="parcial2">-</strong></p>
+        <p>Tercer Parcial: <strong id="parcial3">-</strong></p>
+        <hr>
+        <p>Promedio Final: <strong id="promedio-final">-</strong></p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="./js/scripts.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
