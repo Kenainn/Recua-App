@@ -1,0 +1,103 @@
+.tareas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.tareas-header h1 {
+  font-size: 1.8rem;
+  color: var(--secondary);
+}
+
+.tareas-header p {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.tareas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.tarea-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.tarea-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.tarea-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tarea-header h3 {
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.estado {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.estado.pendiente {
+  background: #ffcc80;
+  color: #7a4f00;
+}
+
+.estado.completada {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.tarea-footer {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-entregar {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-entregar:hover {
+  background: var(--secondary);
+}
+
+.btn-entregar.disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+
+.btn-green {
+  background: var(--accent);
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-green:hover {
+  background: var(--primary);
+  color: #fff;
+}

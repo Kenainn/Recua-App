@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Materias - Recua</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .materia-form-card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      border: 2px dashed var(--accent);
+      transition: 0.3s;
+    }
+    .materia-form-card:hover {
+      border-color: var(--secondary);
+    }
+    .materia-form-card input {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      font-family: 'Poppins', sans-serif;
+    }
+    .materia-form-card input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 3px var(--primary);
+    }
+    .btn-mini {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-mini:hover {
+      background-color: var(--secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button id="toggleSidebar" class="sidebar-toggle"><i class="ri-menu-line"></i></button>
+    <h1>Materias</h1>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <ul class="sidebar-menu">
+      <li onclick="location.href='index.html'"><i data-lucide="home"></i> Home</li>
+      <li onclick="location.href='materias.html'"><i data-lucide='book-open'></i> Materias</li>
+      <li onclick="location.href='tareas.html'"><i data-lucide='check-square'></i> Tareas</li>
+      <li onclick="location.href='progreso.html'"><i data-lucide='trending-up'></i> Progreso</li>
+      <li onclick="location.href='evaluaciones.html'"><i data-lucide='file-check'></i> Evaluaciones</li>
+    </ul>
+
+    <div id="userSidebar" class="user-sidebar">
+      <div class="user-main" id="userMain">
+        <img src="../img/pfp prueba.jpg" alt="Kevin Flores" class="user-img" />
+        <div>
+          <span id="sidebar-username-main">Kevin Flores</span>
+          <small>Estudiante</small>
+        </div>
+      </div>
+
+      <div id="userInfoSidebar" class="user-info-sidebar">
+        <span id="sidebar-username">Kevin Flores</span>
+        <small id="sidebar-email">kevinyedwin388@gmail.com</small>
+        <button id="logout-btn">Cerrar sesión</button>
+      </div>
+    </div>
+    <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="materias-header">
+      <div>
+        <h1>Materias inscritas</h1>
+        <p>Consulta tus materias activas o crea nuevas</p>
+      </div>
+      <button id="agregarMateria" class="btn-green">Agregar Materia</button>
+    </div>
+
+    <div class="materias-grid" id="materiasContainer">
+      <!-- Aquí se agregan dinámicamente las materias y formularios -->
+    </div>
+  </main>
+
+  <script src="./js/scripts.js"></script>
+  <script>
+    lucide.createIcons();
+
+    const materiasContainer = document.getElementById("materiasContainer");
+    const btnAgregar = document.getElementById("agregarMateria");
+    let materias = [];
+
+    btnAgregar.addEventListener("click", crearFormularioMateria);
+
+    function crearFormularioMateria() {
+      const formCard = document.createElement("div");
+      formCard.classList.add("materia-form-card");
+      formCard.innerHTML = `
+        <input type="text" id="nombre" placeholder="Nombre de la materia" pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ ]{2,20}" required title="Solo letras (máx. 20)">
+        <input type="text" id="descripcion" placeholder="Descripción" maxlength="50" required>
+        <input type="text" id="profesor" placeholder="Profesor" pattern="[A-Za-zÁÉÍÓÚáéíóúñÑ ]{2,25}" required title="Solo letras (máx. 25)">
+        <input type="text" id="horario" placeholder="Horario (Ej: Lunes y Miércoles - 10:00 a 11:30)" required>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn-mini" id="guardarMateria">Guardar</button>
+          <button class="btn-mini" style="background:#ccc; color:#212121;" id="cancelarMateria">Cancelar</button>
+        </div>
+      `;
+      materiasContainer.prepend(formCard);
+
+      formCard.querySelector("#cancelarMateria").addEventListener("click", () => formCard.remove());
+
+      formCard.querySelector("#guardarMateria").addEventListener("click", () => {
+        const nombre = formCard.querySelector("#nombre").value.trim();
+        const descripcion = formCard.querySelector("#descripcion").value.trim();
+        const profesor = formCard.querySelector("#profesor").value.trim();
+        const horario = formCard.querySelector("#horario").value.trim();
+
+        const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]{2,20}$/;
+        const regexProfesor = /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]{2,25}$/;
+
+        if (!regexNombre.test(nombre)) return alert("Nombre inválido (solo letras, máx. 20)");
+        if (!regexProfesor.test(profesor)) return alert("Profesor inválido (solo letras, máx. 25)");
+        if (!descripcion || !horario) return alert("Completa todos los campos");
+
+        const materia = { nombre, descripcion, profesor, horario, fecha: new Date().toLocaleDateString() };
+        materias.push(materia);
+        formCard.remove();
+        renderMaterias();
+      });
+    }
+
+    function renderMaterias() {
+      materiasContainer.innerHTML = '';
+      materias.forEach((m, i) => {
+        const card = document.createElement('div');
+        card.classList.add('materia-card');
+        card.innerHTML = `
+          <div class="materia-header">
+            <div class="materia-title">
+              <div class="materia-icon" style="background-color: var(--accent);">
+                <i class="ri-book-2-line"></i>
+              </div>
+              <h3>${m.nombre}</h3>
+            </div>
+            <div class="materia-actions">
+              <i class="ri-delete-bin-line" onclick="eliminarMateria(${i})"></i>
+            </div>
+          </div>
+          <p class="materia-desc">${m.descripcion}</p>
+          <div class="materia-profesor"><i class="ri-user-3-line"></i> ${m.profesor}</div>
+          <div class="materia-calendario"><i class="ri-calendar-line"></i> ${m.horario}</div>
+          <div class="materia-footer">
+            <span class="materia-estado estado-activa">Activa</span>
+            <span class="materia-fecha">Inicio: ${m.fecha}</span>
+          </div>
+        `;
+        materiasContainer.appendChild(card);
+      });
+    }
+
+    function eliminarMateria(index) {
+      materias.splice(index, 1);
+      renderMaterias();
+    }
+  </script>
+</body>
+</html>

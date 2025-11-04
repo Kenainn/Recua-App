@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro | Recua</title>
+  <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+  <div class="login-container">
+    <h1>Recua</h1>
+    <h2>Crear cuenta</h2>
+
+    <form id="registerForm">
+      <label for="nombre">Nombre completo:</label>
+      <input type="text" id="nombre" placeholder="Ej. Kevin Flores" required>
+
+      <label for="email">Correo:</label>
+      <input type="email" id="email" placeholder="ejemplo@recua.com" required>
+
+      <label for="password">Contraseña:</label>
+      <input type="password" id="password" placeholder="••••••••" required>
+
+      <label for="rol">Rol:</label>
+      <select id="rol" required>
+        <option value="">Selecciona tu rol</option>
+        <option value="estudiante">Estudiante</option>
+        <option value="profesor">Profesor</option>
+      </select>
+
+      <button type="submit">Registrar</button>
+    </form>
+
+    <p style="margin-top:10px; font-size:0.9rem;">¿Ya tienes cuenta?
+      <a href="./login.html" style="color: var(--secondary); text-decoration:none;">Inicia sesión</a>
+    </p>
+
+    <p class="footer">© 2025 Recua</p>
+  </div>
+
+  <script src="js/registro.js"></script>
+</body>
+</html>

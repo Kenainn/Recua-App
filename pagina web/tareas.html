@@ -3,30 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mis Tareas</title>
+  <title>Tareas - Recua</title>
   <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/tareas.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <div class="user-sidebar">
-    <div class="user-main">
-      <img src="./img/user.png" alt="Usuario" class="user-img">
-      <p id="sidebar-username-main">Cargando...</p>
-    </div>
-    <div class="user-info-sidebar">
-      <p id="sidebar-username">Cargando...</p>
-      <p id="sidebar-email">Cargando...</p>
-      <p id="sidebar-role"></p>
-      <div id="role-options"></div>
-      <button id="logout-btn">Cerrar Sesión</button>
-    </div>
-  </div>
 
-  <div class="main-content">
-    <div id="current-screen">Tareas</div>
-    <h1>Mis Tareas</h1>
-    <p>Aquí podrás ver tus tareas pendientes, completadas y en progreso.</p>
-  </div>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+    <h1>Tareas</h1>
+  </nav>
 
-  <script src="js/sidebar.js"></script>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <ul>
+      <li onclick="location.href='index.html'"><i class="ri-home-5-line"></i> Home</li>
+      <li onclick="location.href='tareas.html'"><i class="ri-task-line"></i> Tareas</li>
+      <li onclick="location.href='materias.html'"><i class="ri-book-2-line"></i> Materias</li>
+      <li onclick="location.href='calificaciones.html'"><i class="ri-bar-chart-2-line"></i> Calificaciones</li>
+    </ul>
+
+    <hr>
+
+    <!-- Perfil dentro del sidebar -->
+    <div class="user-sidebar">
+      <div class="user-main" id="userMain">
+        <img src="img/kevin.jpg" alt="Usuario" class="user-img">
+        <p id="sidebar-username-main">Kenai Flores</p>
+      </div>
+      <div class="user-info-sidebar" id="userInfoSidebar">
+        <p id="sidebar-username">Kenai Flores</p>
+        <p id="sidebar-email">kevinyedwin388@gmail.com</p>
+        <p id="sidebar-role">Estudiante</p>
+        <button id="logout-btn">Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="tareas-header">
+      <div>
+        <h1>Mis tareas</h1>
+        <p>Revisa tus tareas pendientes y su fecha límite</p>
+      </div>
+      <button class="btn-green">Agregar tarea</button>
+    </div>
+
+    <div class="tareas-grid">
+      <div class="tarea-card">
+        <div class="tarea-header">
+          <h3>Proyecto de Química</h3>
+          <span class="estado pendiente">Pendiente</span>
+        </div>
+        <p>Entrega el 5 de noviembre.</p>
+        <p> Tema: Reacciones químicas.</p>
+        <div class="tarea-footer">
+          <button class="btn-entregar">Entregar</button>
+        </div>
+      </div>
+
+      <div class="tarea-card">
+        <div class="tarea-header">
+          <h3>Tarea de Matemáticas</h3>
+          <span class="estado completada">Completada</span>
+        </div>
+        <p>Integrales definidas.</p>
+        <p>Fecha de entrega: 2 de noviembre.</p>
+        <div class="tarea-footer">
+          <button class="btn-entregar disabled" disabled>Entregada</button>
+        </div>
+      </div>
+
+      <div class="tarea-card">
+        <div class="tarea-header">
+          <h3>Ensayo de Historia</h3>
+          <span class="estado pendiente">Pendiente</span>
+        </div>
+        <p>Entrega el 10 de noviembre.</p>
+        <p>Tema: Revolución mexicana.</p>
+        <div class="tarea-footer">
+          <button class="btn-entregar">Entregar</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./js/sidebar.js"></script>
+  <script src="./js/scripts.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 </html>
