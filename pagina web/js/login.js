@@ -5,6 +5,7 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
   const password = document.getElementById("password").value.trim();
   const rol = document.getElementById("rol").value;
 
+  // Validaciones con expresiones regulares
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^[A-Za-z0-9!@#$%^&*]{6,20}$/;
 
@@ -19,19 +20,26 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
   }
 
   if (!rol) {
-    alert("Selecciona tu rol.");
+    alert("Selecciona tu rol antes de continuar.");
     return;
   }
 
-  // Leer usuarios del localStorage
-  const users = JSON.parse(localStorage.getItem("usuarios")) || {};
+  // Simulación de usuarios registrados
+  const usuarios = {
+    "alumno@recua.com": { nombre: "Kevin Flores", password: "123456789", rol: "estudiante" },
+    "profe@recua.com": { nombre: "Profa. Alma", password: "123456789", rol: "profesor" }
+  };
 
-  if (users[email] && users[email].password === password && users[email].rol === rol) {
-    alert("Inicio de sesión exitoso 🎉");
+  // Verificar credenciales
+  if (usuarios[email] && usuarios[email].password === password && usuarios[email].rol === rol) {
+    alert(`Bienvenido ${usuarios[email].nombre} 👋`);
+    localStorage.setItem("usuarioActual", JSON.stringify(usuarios[email]));
+
+    // Redirección según rol
     if (rol === "profesor") {
-      window.location.href = "index_profesor.html";
+      window.location.href = "index.html";
     } else {
-      window.location.href = "index_estudiante.html";
+      window.location.href = "index.html";
     }
   } else {
     alert("Correo, contraseña o rol incorrectos ❌");

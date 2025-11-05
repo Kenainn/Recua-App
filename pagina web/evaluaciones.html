@@ -5,12 +5,120 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Evaluaciones | Recua</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./css/style.css">
 <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body>
 
-<!-- Navbar con botón de 3 rayas -->
+<style>
+:root {
+  --primary: #4db6ac;
+  --secondary: #00695c;
+  --background: #e0f2f1;
+  --text: #212121;
+  --accent: #80cbc4;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  margin: 0;
+}
+
+.navbar {
+  background-color: var(--primary);
+  color: white;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar {
+  background-color: var(--secondary);
+  color: white;
+  width: 220px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  padding: 1rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin-bottom: 1rem;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.user-sidebar {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.user-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.main {
+  margin-left: 240px;
+  padding: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 1rem 2rem;
+  margin-top: 1rem;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: .6rem 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary);
+}
+
+.tabla-tareas {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.tabla-tareas th, .tabla-tareas td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+.btn-editar {
+  background-color: var(--accent);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+<!-- Navbar -->
 <nav class="navbar">
   <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
   <h1>Evaluaciones</h1>
@@ -19,23 +127,25 @@
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
   <ul>
-    <!-- Ítems se generan desde JS general, incluyendo Home/Main -->
+    <li><a href="./index.html">Inicio</a></li>
+    <li><a href="#">Evaluaciones</a></li>
+    <li><a href="#">Alumnos</a></li>
+    <li><a href="#">Configuración</a></li>
   </ul>
 
-  <!-- User Sidebar -->
   <div class="user-sidebar" id="userSidebar">
     <div class="user-main">
-      <img src="./img/user.png" alt="Usuario" class="user-img">
-      <p id="sidebar-username-main">Kenai Flores</p>
+      <img src="../img/pfp prueba.jpg" alt="Usuario" class="user-img">
+      <p id="sidebar-username-main">Profe. Example</p>
     </div>
     <div class="user-info-sidebar" id="userInfoSidebar">
-      <p id="sidebar-username">Kenai Flores</p>
-      <p id="sidebar-email">kevinyedwin388@gmail.com</p>
-      <button id="logout-btn">Cerrar Sesión</button>
+      <p id="sidebar-username">Profe</p>
+      <p id="sidebar-email">profe@recua.com</p>
+      <button id="logout-btn" class="btn-primary" style="background:#ff5252;">Cerrar Sesión</button>
     </div>
   </div>
 
-  <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  <button id="closeSidebar" class="sidebar-close btn-primary" style="margin-top:20px;background:#004d40;">✖ Ocultar</button>
 </aside>
 
 <!-- Contenido principal -->
@@ -44,10 +154,10 @@
   <h1>Gestión de Evaluaciones</h1>
   <p>Busca un alumno por su boleta para revisar, calificar y ver su promedio general.</p>
 
-  <!-- Buscador de alumno -->
+  <!-- Buscador -->
   <div class="evaluaciones-section">
-    <div class="search-bar">
-      <input type="text" id="boleta-input" placeholder="Buscar alumno por boleta...">
+    <div class="search-bar" style="display:flex;gap:10px;align-items:center;">
+      <input type="text" id="boleta-input" placeholder="Buscar alumno por boleta..." style="padding:8px;border-radius:10px;border:1px solid #ccc;flex:1;">
       <button class="btn-primary" id="buscar-alumno">Buscar</button>
     </div>
 
@@ -81,7 +191,81 @@
   </div>
 </main>
 
-<script src="./js/scripts.js"></script>
-<script>lucide.createIcons();</script>
+<script>
+lucide.createIcons();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const alumnoInfo = document.getElementById("alumno-info");
+  const nombreAlumno = document.getElementById("nombre-alumno");
+  const boletaAlumno = document.getElementById("boleta-alumno");
+  const tablaEvaluaciones = document.getElementById("tabla-evaluaciones").querySelector("tbody");
+  const buscarBtn = document.getElementById("buscar-alumno");
+
+  const parcial1 = document.getElementById("parcial1");
+  const parcial2 = document.getElementById("parcial2");
+  const parcial3 = document.getElementById("parcial3");
+  const promedioFinal = document.getElementById("promedio-final");
+
+  // Datos simulados
+  const alumnos = [
+    {
+      nombre: "Kevin Flores",
+      boleta: "20251234",
+      tareas: [
+        { nombre: "Tarea 1 - Ecuaciones", calificacion: 90 },
+        { nombre: "Tarea 2 - Vectores", calificacion: 85 },
+        { nombre: "Tarea 3 - Distancias", calificacion: 100 }
+      ],
+      parciales: [88, 90, 95]
+    },
+    {
+      nombre: "Axel Villegas",
+      boleta: "20257890",
+      tareas: [
+        { nombre: "Tarea 1 - Álgebra", calificacion: 70 },
+        { nombre: "Tarea 2 - Cónicas", calificacion: 75 },
+        { nombre: "Tarea 3 - Rectas", calificacion: 80 }
+      ],
+      parciales: [72, 78, 80]
+    }
+  ];
+
+  buscarBtn.addEventListener("click", () => {
+    const boleta = document.getElementById("boleta-input").value.trim();
+    const alumno = alumnos.find(a => a.boleta === boleta);
+
+    if (!alumno) {
+      alert("No se encontró ningún alumno con esa boleta.");
+      alumnoInfo.style.display = "none";
+      return;
+    }
+
+    // Mostrar info
+    alumnoInfo.style.display = "block";
+    nombreAlumno.textContent = alumno.nombre;
+    boletaAlumno.textContent = `Boleta: ${alumno.boleta}`;
+
+    // Llenar tabla
+    tablaEvaluaciones.innerHTML = "";
+    alumno.tareas.forEach(t => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${t.nombre}</td>
+        <td>${t.calificacion}</td>
+        <td><button class="btn-editar">Editar</button></td>
+      `;
+      tablaEvaluaciones.appendChild(row);
+    });
+
+    // Mostrar promedios
+    parcial1.textContent = alumno.parciales[0];
+    parcial2.textContent = alumno.parciales[1];
+    parcial3.textContent = alumno.parciales[2];
+
+    const prom = Math.round(alumno.parciales.reduce((a, b) => a + b, 0) / 3);
+    promedioFinal.textContent = prom;
+  });
+});
+</script>
 </body>
 </html>

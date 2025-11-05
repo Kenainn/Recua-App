@@ -14,13 +14,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const userMain = document.querySelector(".user-main");
 
   // Rol temporal
-  const userRole = "alumno";
+  const userRole = "profesor";
 
   const commonOptions = [
     { name: "Home", icon: "home", page: "index.html" }, //  esto es lo que faltaba para que jale el home
     { name: "Materias", icon: "book-open", page: "materias.html" },
     { name: "Tareas", icon: "check-square", page: "tareas.html" },
-  /*  { name: "Progreso", icon: "trending-up", page: "progreso.html" },*/
+    { name: "Progreso", icon: "trending-up", page: "progreso.html" },
   ];
 
 
