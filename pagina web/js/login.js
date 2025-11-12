@@ -1,5 +1,6 @@
 document.getElementById("loginForm").addEventListener("submit", function(e) {
   e.preventDefault();
+ /*Corregir login *Kenai* */ 
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
