@@ -85,7 +85,7 @@ closeBtn.addEventListener("click", () => {
   /* ==========================
      YAK / ESTADÍSTICAS / RACHAS
      ========================== */
-  let yakLevel = 1, yakExp = 0, currentStreak = 7, bestStreak = 10, subjectsActive = 3, tasksCompleted = 5;
+  let yakLevel = 1, yakExp = 40, currentStreak = 7, bestStreak = 10, subjectsActive = 3, tasksCompleted = 5;
 
   function updateStats() {
     document.getElementById("exp-fill").style.width = Math.min(yakExp / (yakLevel * 200) * 100, 100) + "%";

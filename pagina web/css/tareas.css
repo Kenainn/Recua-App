@@ -97,6 +97,22 @@
   transition: all 0.3s ease;
 }
 
+.btn-red {
+  background: #e53935; /* rojo base */
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+}
+
+.btn-red:hover {
+  background: #b71c1c; /* rojo más oscuro al pasar el cursor */
+}
+
+
 .btn-green:hover {
   background: var(--primary);
   color: #fff;
