@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro | Recua</title>
-  <link rel="stylesheet" href="css/login.css">
+  <title>Iniciar Sesión | Recua</title>
+  <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>
   <div class="login-container">
     <h1>Recua</h1>
-    <h2>Crear cuenta</h2>
-
-    <form id="registerForm">
-      <label for="nombre">Nombre completo:</label>
-      <input type="text" id="nombre" placeholder="Ej. Kevin Flores" required>
-
+    <h2>Iniciar Sesión</h2>
+    
+    <form id="loginForm">
       <label for="email">Correo:</label>
       <input type="email" id="email" placeholder="ejemplo@recua.com" required>
 
@@ -28,16 +25,14 @@
         <option value="profesor">Profesor</option>
       </select>
 
-      <button type="submit">Registrar</button>
+      <button type="submit">Entrar</button>
     </form>
 
-    <p style="margin-top:10px; font-size:0.9rem;">¿Ya tienes cuenta?
-      <a href="./iniciosesion.html" style="color: var(--secondary); text-decoration:none;">Inicia sesión</a>
-    </p>
+    <p id="mensaje" style="color:red; margin-top:10px;"></p>
 
     <p class="footer">© 2025 Recua</p>
   </div>
 
-  <script src="js/registro.js"></script>
+  <script src="./js/login.js"></script>
 </body>
 </html>
