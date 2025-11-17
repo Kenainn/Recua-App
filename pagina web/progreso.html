@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logros y Skins - Recua</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/logros.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+    <h1>Logros y Skins</h1>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <ul>
+      <li onclick="location.href='index.html'"><i class="ri-home-5-line"></i> Home</li>
+      <li onclick="location.href='tareas.html'"><i class="ri-task-line"></i> Tareas</li>
+      <li onclick="location.href='materias.html'"><i class="ri-book-2-line"></i> Materias</li>
+      <li onclick="location.href='calificaciones.html'"><i class="ri-bar-chart-2-line"></i> Calificaciones</li>
+      <li onclick="location.href='logros.html'" class="active"><i class="ri-medal-line"></i> Logros y Skins</li>
+    </ul>
+
+    <hr>
+
+    <div class="user-sidebar">
+      <div class="user-main" id="userMain">
+        <img src="img/kevin.jpg" alt="Usuario" class="user-img">
+        <p id="sidebar-username-main">Kenai Flores</p>
+      </div>
+      <div class="user-info-sidebar" id="userInfoSidebar">
+        <p id="sidebar-username">Kenai Flores</p>
+        <p id="sidebar-email">kevinyedwin388@gmail.com</p>
+        <p id="sidebar-role">Estudiante</p>
+        <button id="logout-btn">Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="logros-header">
+      <div>
+        <h1>Progreso del usuario</h1>
+        <p>Aquí puedes ver los logros y skins que has obtenido, y los que aún te faltan desbloquear.</p>
+      </div>
+    </div>
+
+    <section class="logros-section">
+      <h2><i class="ri-trophy-line"></i> Logros desbloqueados</h2>
+      <div class="logros-grid">
+        <div class="logro-card desbloqueado">
+          <img src="img/logro1.png" alt="Logro 1">
+          <h3>Racha de 7 días</h3>
+          <p>Mantén tu racha una semana completa.</p>
+        </div>
+
+        <div class="logro-card desbloqueado">
+          <img src="img/logro2.png" alt="Logro 2">
+          <h3>Primera entrega</h3>
+          <p>Entrega tu primera tarea a tiempo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="logros-section">
+      <h2><i class="ri-lock-line"></i> Logros bloqueados</h2>
+      <div class="logros-grid">
+        <div class="logro-card bloqueado">
+          <img src="img/logro3.png" alt="Logro bloqueado">
+          <h3>Racha de 30 días</h3>
+          <p>Mantén tu racha activa durante un mes.</p>
+        </div>
+
+        <div class="logro-card bloqueado">
+          <img src="img/logro4.png" alt="Logro bloqueado">
+          <h3>Estudiante ejemplar</h3>
+          <p>Entrega todas tus tareas del mes sin retraso.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="skins-section">
+      <h2><i class="ri-shirt-line"></i> Skins obtenidas</h2>
+      <div class="skins-grid">
+        <div class="skin-card desbloqueado">
+          <img src="img/skin1.png" alt="Skin Yak 1">
+          <h3>Yak clásico</h3>
+        </div>
+
+        <div class="skin-card desbloqueado">
+          <img src="img/skin2.png" alt="Skin Yak 2">
+          <h3>Yak elfo</h3>
+        </div>
+      </div>
+
+      <h2><i class="ri-lock-2-line"></i> Skins bloqueadas</h2>
+      <div class="skins-grid">
+        <div class="skin-card bloqueado">
+          <img src="img/skin3.png" alt="Skin bloqueada">
+          <h3>Yak pescador</h3>
+        </div>
+
+        <div class="skin-card bloqueado">
+          <img src="img/skin4.png" alt="Skin bloqueada">
+          <h3>Yak chefsito</h3>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./js/scripts.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
