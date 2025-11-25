@@ -25,6 +25,9 @@ body {
   align-items: center;
   padding: 12px 24px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 .navbar h1 { font-size: 1.5rem; }
 .sidebar-toggle { background:none; border:none; cursor:pointer; color:white; }
@@ -33,7 +36,7 @@ body {
 .sidebar {
   width:240px;
   background-color: var(--white);
-  padding: 20px;
+  /*padding: 20px;*/
   box-shadow: 2px 0 10px rgba(0,0,0,0.1);
   min-height: 100vh;
   position:fixed;
@@ -88,7 +91,7 @@ body {
 #logout-btn { background:none; color:red; border:none; cursor:pointer; margin-top:4px; font-weight:bold; }
 
 /* === MAIN === */
-.main { margin-left:260px; padding:24px; }
+.main { /*margin-left:30px;*/ padding:24px; }
 
 /* === STREAK / YAK === */
 .streak-header h1 { font-size:1.8rem; margin:0; }
@@ -97,6 +100,7 @@ body {
 .card { background:white; border-radius:16px; padding:16px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
 .white-card { background:white; }
 .horizontal-card .stat { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+.horizontal-layout .card, .horizontal-layout .white-card, .horizontal-card {flex: 1 1 250px; width: 100%;}
 
 .yak-card { text-align:center; width:180px; }
 .yak-bg { position:relative; }

@@ -1,34 +1,58 @@
 const form = document.getElementById("loginForm");
 const mensaje = document.getElementById("mensaje");
 
+// URL base de tu servidor
+const SERVER_URL = "http://localhost:3000";
+
 form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const rol = document.getElementById("rol").value;
+    // Limpiar mensaje anterior
+    mensaje.textContent = "";
 
-  try {
-    const res = await fetch("http://localhost:5050/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password, rol })
-    });
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const rol = document.getElementById("rol").value;
 
-    const data = await res.json();
-
-    if (data.success) {
-      localStorage.setItem("usuario", JSON.stringify(data.user));
-      localStorage.setItem("rol", rol);
-
-      window.location.href = "./index.html";
-    } else {
-      mensaje.textContent = "Credenciales incorrectas o usuario no encontrado.";
+    // Validación básica
+    if (!email || !password || !rol) {
+        mensaje.textContent = "Por favor, completa todos los campos.";
+        return;
     }
 
-  } catch (error) {
-    mensaje.textContent = "Error al conectar con el servidor.";
-  }
+    try {
+        const res = await fetch(`${SERVER_URL}/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: 'include', // IMPORTANTE: Incluir cookies de sesión
+            body: JSON.stringify({ email, password, rol })
+        });
+
+        // Asegurarse de que la respuesta sea JSON, incluso si hay error 401/500
+        const data = await res.json(); 
+
+        if (data.success) {
+            // ÉXITO - Ya no usamos localStorage, la sesión está en el servidor
+            mensaje.style.color = "green";
+            mensaje.textContent = `¡Bienvenido(a), ${data.user.nombre || 'usuario'}! Redirigiendo...`;
+
+            // Redirigir al dashboard
+            setTimeout(() => {
+                window.location.href = "/index.html"; // Cambiar a la ruta del servidor
+            }, 500);
+
+        } else {
+            // FALLO DE AUTENTICACIÓN
+            mensaje.style.color = "red";
+            mensaje.textContent = data.message || "Credenciales incorrectas o usuario no encontrado.";
+        }
+
+    } catch (error) {
+        // FALLO DE CONEXIÓN
+        console.error("Error de conexión:", error);
+        mensaje.style.color = "red";
+        mensaje.textContent = `Error al conectar con el servidor en ${SERVER_URL}. Asegúrate de que esté corriendo.`;
+    }
 });
