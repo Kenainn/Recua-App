@@ -31,7 +31,7 @@ form.addEventListener("submit", async (e) => {
         });
 
         // Asegurarse de que la respuesta sea JSON, incluso si hay error 401/500
-        const data = await res.json(); 
+        const data = await res.json();
 
         if (data.success) {
             // ÉXITO - Ya no usamos localStorage, la sesión está en el servidor
@@ -40,7 +40,7 @@ form.addEventListener("submit", async (e) => {
 
             // Redirigir al dashboard
             setTimeout(() => {
-                window.location.href = "/index.html"; // Cambiar a la ruta del servidor
+                window.location.href = "/index"; // Cambiar a la ruta del servidor
             }, 500);
 
         } else {

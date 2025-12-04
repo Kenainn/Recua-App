@@ -1,48 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recua Dashboard</title>
-<link rel="stylesheet" href="./css/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recua Dashboard</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
 
-<!-- Navbar -->
-<nav class="navbar">
-  <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
-  <h1>Recua Dashboard</h1>
-</nav>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+    <h1>Recua Dashboard</h1>
+  </nav>
 
-<!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
-  <ul></ul>
-  <hr>
-  <!-- Perfil dentro del sidebar -->
-  <div class="user-sidebar">
-    <div class="user-main" id="userMain">
-      <img src="../img/pfp prueba.jpg" alt="Usuario" class="user-img">
-      <p id="sidebar-username-main">Kenai Flores</p>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <ul></ul>
+    <hr>
+    <!-- Perfil dentro del sidebar -->
+    <div class="user-sidebar">
+      <div class="user-main" id="userMain">
+        <img src="../recuaimg/pfp prueba.jpg" alt="Usuario" class="user-img">
+        <p id="sidebar-username-main">
+          <%= usuario.nombre %>
+        </p>
+      </div>
+      <div class="user-info-sidebar" id="userInfoSidebar">
+        <p id="sidebar-username">
+          <%= usuario.nombre %>
+        </p>
+        <p id="sidebar-email">
+          <%= usuario.correo %>
+        </p>
+        <p id="sidebar-role">
+          <%= usuario.tipo==='alumno' ? 'Alumno' : 'Profesor' %>
+        </p>
+        <button id="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+      </div>
     </div>
-    <div class="user-info-sidebar" id="userInfoSidebar">
-      <p id="sidebar-username">Kenai Flores</p>
-      <p id="sidebar-email">kevinyedwin388@gmail.com</p>
-      <p id="sidebar-role">Profesor</p>
-      <button id="logout-btn">Cerrar Sesión</button>
-    </div>
-  </div>
-  <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
-</aside>
+    <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  </aside>
 
-<!-- Main content -->
-<main class="main">
+  <!-- Main content -->
+  <main class="main">
 
-  <!-- Streak / Yak -->
-  <section class="streak">
-    <div class="streak-header">
-      <h1>¡Hola, <span id="username">Kenai</span>! 👋</h1>
+    <!-- Streak / Yak -->
+    <section class="streak">
+      <div class="streak-header">
+        <h1>¡Hola, <span id="username">
+            <%= usuario.nombre.split(' ')[0] %></span>! 👋</h1>
       <p class="streak-subtitle">¿Listo para seguir aprendiendo con Yak?</p>
     </div>
     <div class="streak-cards horizontal-layout">
@@ -106,17 +117,12 @@
       <div class="card white-card">
         <h3>Próximas Tareas</h3>
         <ul id="upcoming-tasks" style="list-style:none; padding:0; margin:0;">
-          <li><span style="color:#ff9800;">•</span> Proyecto de química - Prof. Ruiz</li>
-          <li><span style="color:#4caf50;">•</span> Ensayo de historia - Prof. Gómez</li>
         </ul>
       </div>
 
       <div class="card white-card">
         <h3>Mis Materias</h3>
         <ul id="my-subjects" style="list-style:none; padding:0; margin:0;">
-          <li><span style="background:#f44336; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Progra Web - Prof. Jimmy</li>
-          <li><span style="background:#2196f3; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Progra Movil - Profa. Alma</li>
-          <li><span style="background:#ffeb3b; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> Sistemas Distribuidos - Prof. Jesus</li>
         </ul>
       </div>
     </div>
@@ -127,6 +133,20 @@
 <script src="./js/scripts.js"></script>
 <script>
   lucide.createIcons();
+
+  // Función para cerrar sesión
+  function cerrarSesion() {
+    fetch(' /logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(response =>
+      response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = '/signup';
+        }
+      })
+      .catch(error => {
+        console.error('Error al cerrar sesión:', error);
+      });
+  }
 
   // Simular tareas en el tablon
   const tasksTodayContainer = document.getElementById('tasks-today');
@@ -143,9 +163,11 @@
     div.style.borderRadius = "12px";
     div.style.background = "white";
     div.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-    div.innerHTML = `<strong>${task.title}</strong><br><span>${task.subject}</span><br><small>${task.date}</small>`;
+    div.innerHTML =
+      `<strong>${task.title}</strong><br><span>${task.subject}</span><br><small>${task.date}</small>`;
     tasksTodayContainer.appendChild(div);
   });
 </script>
 </body>
+
 </html>

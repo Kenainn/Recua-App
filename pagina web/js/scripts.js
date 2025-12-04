@@ -13,61 +13,81 @@ document.addEventListener("DOMContentLoaded", () => {
   const userInfoSidebar = document.getElementById("userInfoSidebar");
   const userMain = document.querySelector(".user-main");
 
-  // Rol temporal - esto se puede obtener del servidor
-  const userRole = "profesor";
+  // Obtener datos del usuario desde la sesión
+  let userRole = "alumno"; // valor por defecto
+
+  fetch('/verificar-sesion')
+    .then(res => res.json())
+    .then(data => {
+      if (data.autenticado) {
+        userRole = data.usuario.tipo;
+        actualizarMenu();
+      }
+    })
+    .catch(err => console.error('Error al verificar sesión:', err));
 
   const commonOptions = [
-    { name: "Home", icon: "home", page: "index.html" },
-    { name: "Materias", icon: "book-open", page: "materias.html" },
-    { name: "Tareas", icon: "check-square", page: "tareas.html" },
-    { name: "Progreso", icon: "trending-up", page: "progreso.html" },
+    { name: "Home", icon: "home", page: "/index" },
+    { name: "Materias", icon: "book-open", page: "/materias" },
+    { name: "Tareas", icon: "check-square", page: "/tareas" },
+    { name: "Progreso", icon: "trending-up", page: "/progreso" },
   ];
 
   const teacherOptions = [
-    { name: "Evaluaciones", icon: "file-check", page: "evaluaciones.html" },
+    { name: "Evaluaciones", icon: "file-check", page: "/evaluaciones" },
   ];
 
-  const menuOptions =
-    userRole === "profesor"
-      ? [...commonOptions, ...teacherOptions]
-      : commonOptions;
+  function actualizarMenu() {
+    const menuOptions =
+      userRole === "profesor"
+        ? [...commonOptions, ...teacherOptions]
+        : commonOptions;
 
-  const menuList = sidebar.querySelector("ul");
-  menuList.innerHTML = "";
-  
-  // Agregar opciones del menú
-  menuOptions.forEach(opt => {
-    const li = document.createElement("li");
-    li.innerHTML = `<i data-lucide="${opt.icon}"></i> ${opt.name}`;
-    li.addEventListener("click", () => {
-      window.location.href = opt.page;
+    const menuList = sidebar.querySelector("ul");
+    if (!menuList) return;
+
+    menuList.innerHTML = "";
+
+    // Agregar opciones del menú
+    menuOptions.forEach(opt => {
+      const li = document.createElement("li");
+      li.innerHTML = `<i data-lucide="${opt.icon}"></i> ${opt.name}`;
+      li.addEventListener("click", () => {
+        window.location.href = opt.page;
+      });
+      menuList.appendChild(li);
     });
-    menuList.appendChild(li);
-  });
 
-  // Agregar separador y botón de cerrar sesión
-  const separador = document.createElement("hr");
-  separador.style.margin = "10px 0";
-  separador.style.border = "none";
-  separador.style.borderTop = "1px solid #e0e0e0";
-  menuList.appendChild(separador);
+    // Agregar separador y botón de cerrar sesión
+    const separador = document.createElement("hr");
+    separador.style.margin = "10px 0";
+    separador.style.border = "none";
+    separador.style.borderTop = "1px solid #e0e0e0";
+    menuList.appendChild(separador);
 
-  const logoutLi = document.createElement("li");
-  logoutLi.innerHTML = `<i data-lucide="log-out"></i> Cerrar Sesión`;
-  logoutLi.style.color = "#f44336";
-  logoutLi.style.cursor = "pointer";
-  logoutLi.addEventListener("click", async () => {
+    const logoutLi = document.createElement("li");
+    logoutLi.innerHTML = `<i data-lucide="log-out"></i> Cerrar Sesión`;
+    logoutLi.style.color = "#f44336";
+    logoutLi.style.cursor = "pointer";
+    logoutLi.addEventListener("click", cerrarSesion);
+    menuList.appendChild(logoutLi);
+
+    lucide.createIcons();
+  }
+
+  // Función para cerrar sesión
+  async function cerrarSesion() {
     if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
       try {
-        const response = await fetch('http://localhost:3000/logout', {
+        const response = await fetch('/logout', {
           method: 'POST',
           credentials: 'include'
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-          window.location.href = '/login';
+          window.location.href = '/signup';
         } else {
           alert('Error al cerrar sesión');
         }
@@ -76,76 +96,47 @@ document.addEventListener("DOMContentLoaded", () => {
         alert('Error al cerrar sesión');
       }
     }
-  });
-  menuList.appendChild(logoutLi);
-
-  lucide.createIcons();
+  }
 
   // Abrir/cerrar sidebar
-  toggleBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("active");
-  });
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("active");
+    });
+  }
 
   // Click fuera para cerrar sidebar y usuario
   document.addEventListener("click", e => {
-    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+    if (sidebar && !sidebar.contains(e.target) && toggleBtn && !toggleBtn.contains(e.target)) {
       sidebar.classList.remove("active");
-      userInfoSidebar.classList.remove("active");
+      if (userInfoSidebar) userInfoSidebar.classList.remove("active");
     }
   });
-  
+
   const closeBtn = document.getElementById("closeSidebar");
-  closeBtn.addEventListener("click", () => {
-    sidebar.classList.remove("active");
-  });
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      sidebar.classList.remove("active");
+    });
+  }
 
   // Toggle info usuario
-  userMain.addEventListener("click", () => {
-    userInfoSidebar.classList.toggle("active");
-  });
+  if (userMain) {
+    userMain.addEventListener("click", () => {
+      if (userInfoSidebar) userInfoSidebar.classList.toggle("active");
+    });
+  }
 
   // Cerrar sesión desde el botón del sidebar de usuario
-  document.getElementById("logout-btn").addEventListener("click", async () => {
-    if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-      try {
-        const response = await fetch('http://localhost:3000/logout', {
-          method: 'POST',
-          credentials: 'include'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          window.location.href = '/login';
-        } else {
-          alert('Error al cerrar sesión');
-        }
-      } catch (error) {
-        console.error('Error al cerrar sesión:', error);
-        alert('Error al cerrar sesión');
-      }
-    }
-  });
-
-  // Datos simulados de usuario (esto debería venir del servidor)
-  const username = "Prepucio Lopez";
-  const userEmail = "kevinyedwin388@gmail.com";
-  
-  // Verificar si los elementos existen antes de actualizar
-  const sidebarUsernameMain = document.getElementById("sidebar-username-main");
-  const sidebarUsername = document.getElementById("sidebar-username");
-  const sidebarEmail = document.getElementById("sidebar-email");
-  const usernameDisplay = document.getElementById("username");
-  
-  if (sidebarUsernameMain) sidebarUsernameMain.textContent = username;
-  if (sidebarUsername) sidebarUsername.textContent = username;
-  if (sidebarEmail) sidebarEmail.textContent = userEmail;
-  if (usernameDisplay) usernameDisplay.textContent = username;
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", cerrarSesion);
+  }
 
   /* ==========================
      YAK / ESTADÍSTICAS / RACHAS
      ========================== */
-  let yakLevel = 1, yakExp = 40, currentStreak = 7, bestStreak = 10, subjectsActive = 3, tasksCompleted = 5;
+  let yakLevel = 1, yakExp = 40, currentStreak = 7, bestStreak = 10;
 
   function updateStats() {
     const expFill = document.getElementById("exp-fill");
@@ -153,62 +144,235 @@ document.addEventListener("DOMContentLoaded", () => {
     const yakLevelEl = document.getElementById("yak-level");
     const currentStreakEl = document.getElementById("current-streak");
     const bestStreakEl = document.getElementById("best-streak");
-    const subjectsCountEl = document.getElementById("subjects-count");
-    const tasksProgressEl = document.getElementById("tasks-progress");
-    
+
     if (expFill) expFill.style.width = Math.min(yakExp / (yakLevel * 200) * 100, 100) + "%";
-    if (expText) expText.textContent = `${yakExp} / ${yakLevel*200} exp`;
+    if (expText) expText.textContent = `${yakExp} / ${yakLevel * 200} exp`;
     if (yakLevelEl) yakLevelEl.textContent = yakLevel;
     if (currentStreakEl) currentStreakEl.textContent = currentStreak;
     if (bestStreakEl) bestStreakEl.textContent = bestStreak;
-    if (subjectsCountEl) subjectsCountEl.textContent = subjectsActive;
-    if (tasksProgressEl) tasksProgressEl.textContent = tasksCompleted;
   }
   updateStats();
 
   /* ==========================
-     TAREAS DINÁMICAS
+     DASHBOARD - Cargar datos de la BD
+     ========================== */
+
+  // Cargar tareas de hoy
+  async function cargarTareasHoy() {
+    const tasksTodayContainer = document.getElementById('tasks-today');
+    if (!tasksTodayContainer) return;
+
+    try {
+      const response = await fetch('/api/tareas/hoy');
+      const data = await response.json();
+
+      tasksTodayContainer.innerHTML = '';
+
+      if (data.success && data.tareas.length > 0) {
+        data.tareas.forEach(tarea => {
+          const div = document.createElement('div');
+          div.classList.add('task-card');
+          div.style.padding = "10px";
+          div.style.borderRadius = "12px";
+          div.style.background = "white";
+          div.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+
+          const fecha = new Date(tarea.fecha_entrega).toLocaleDateString('es-MX');
+
+          div.innerHTML = `
+            <strong>${tarea.titulo}</strong><br>
+            <span>${tarea.materia_nombre || 'Sin materia'}</span><br>
+            <small>${fecha}</small>
+          `;
+          tasksTodayContainer.appendChild(div);
+        });
+      } else {
+        tasksTodayContainer.innerHTML = '<p style="text-align:center; color:#999;">No hay tareas para hoy</p>';
+      }
+    } catch (error) {
+      console.error('Error al cargar tareas de hoy:', error);
+    }
+  }
+
+  // Cargar estadísticas
+  async function cargarEstadisticas() {
+    try {
+      // Cargar materias activas
+      const responseMaterias = await fetch('/api/materias');
+      const dataMaterias = await responseMaterias.json();
+      const subjectsCountEl = document.getElementById('subjects-count');
+      if (dataMaterias.success && subjectsCountEl) {
+        subjectsCountEl.textContent = dataMaterias.materias.length;
+      }
+
+      // Cargar todas las tareas para contar
+      const responseTareas = await fetch('/api/tareas');
+      const dataTareas = await responseTareas.json();
+      const tasksProgressEl = document.getElementById('tasks-progress');
+      if (dataTareas.success && tasksProgressEl) {
+        tasksProgressEl.textContent = dataTareas.tareas.length;
+      }
+    } catch (error) {
+      console.error('Error al cargar estadísticas:', error);
+    }
+  }
+
+  // Cargar próximas tareas
+  async function cargarProximasTareas() {
+    const upcomingTasks = document.getElementById('upcoming-tasks');
+    if (!upcomingTasks) return;
+
+    try {
+      const response = await fetch('/api/tareas');
+      const data = await response.json();
+
+      upcomingTasks.innerHTML = '';
+
+      if (data.success && data.tareas.length > 0) {
+        // Mostrar las próximas 3 tareas
+        data.tareas.slice(0, 3).forEach(tarea => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span style="color:#ff9800;">•</span> ${tarea.titulo} - ${tarea.materia_nombre || 'Sin materia'}`;
+          upcomingTasks.appendChild(li);
+        });
+      } else {
+        upcomingTasks.innerHTML = '<li>No hay tareas próximas</li>';
+      }
+    } catch (error) {
+      console.error('Error al cargar próximas tareas:', error);
+    }
+  }
+
+  // Cargar mis materias
+  async function cargarMisMaterias() {
+    const mySubjects = document.getElementById('my-subjects');
+    if (!mySubjects) return;
+
+    try {
+      const response = await fetch('/api/materias');
+      const data = await response.json();
+
+      mySubjects.innerHTML = '';
+
+      if (data.success && data.materias.length > 0) {
+        const colores = ['#f44336', '#2196f3', '#ffeb3b', '#4caf50', '#ff9800'];
+
+        data.materias.forEach((materia, index) => {
+          const li = document.createElement('li');
+          const color = colores[index % colores.length];
+          li.innerHTML = `
+            <span style="background:${color}; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> 
+            ${materia.nombre} - ${materia.nombre_profesor || 'Sin profesor'}
+          `;
+          mySubjects.appendChild(li);
+        });
+      } else {
+        mySubjects.innerHTML = '<li>No hay materias registradas</li>';
+      }
+    } catch (error) {
+      console.error('Error al cargar materias:', error);
+    }
+  }
+
+  // Inicializar funciones del dashboard
+  cargarTareasHoy();
+  cargarEstadisticas();
+  cargarProximasTareas();
+  cargarMisMaterias();
+
+  /* ==========================
+     TAREAS DINÁMICAS (PÁGINA DE TAREAS)
      ========================== */
   const tasksContainer = document.getElementById("tasks-container");
   const addTaskBtn = document.getElementById("addTaskBtn");
-  let tasks = [
-    { title:"Ensayo de literatura", subject:"Español", date:"25/10/2025", completed:false },
-    { title:"Proyecto de física", subject:"Ciencias", date:"26/10/2025", completed:true },
-  ];
 
-  function renderTasks() {
+  async function renderTasks() {
     if (!tasksContainer) return;
-    
-    tasksContainer.innerHTML = "";
-    tasks.forEach(t => {
-      const div = document.createElement("div");
-      div.classList.add("task-card");
-      div.innerHTML = `
-        <h3>${t.title}</h3>
-        <p>${t.subject}</p>
-        <p><i data-lucide="calendar"></i> ${t.date}</p>
-        <div class="task-status ${t.completed ? "done" : "pending"}">
-          ${t.completed ? "Completada" : "Pendiente"}
-        </div>`;
-      tasksContainer.appendChild(div);
-    });
-    lucide.createIcons();
+
+    try {
+      const response = await fetch('/api/tareas');
+      const data = await response.json();
+
+      tasksContainer.innerHTML = "";
+
+      if (data.success && data.tareas.length > 0) {
+        data.tareas.forEach(t => {
+          const div = document.createElement("div");
+          div.classList.add("task-card");
+
+          const fecha = new Date(t.fecha_entrega).toLocaleDateString('es-MX');
+
+          div.innerHTML = `
+            <h3>${t.titulo}</h3>
+            <p>${t.materia_nombre || 'Sin materia'}</p>
+            <p><i data-lucide="calendar"></i> ${fecha}</p>
+            <div class="task-status pending">Pendiente</div>
+          `;
+          tasksContainer.appendChild(div);
+        });
+        lucide.createIcons();
+      } else {
+        tasksContainer.innerHTML = '<p style="text-align:center; color:#999;">No hay tareas registradas</p>';
+      }
+    } catch (error) {
+      console.error('Error al cargar tareas:', error);
+      tasksContainer.innerHTML = '<p style="text-align:center; color:red;">Error al cargar tareas</p>';
+    }
   }
 
-  if(addTaskBtn){
-    addTaskBtn.addEventListener("click", () => {
-      const title = prompt("Nombre de la tarea:");
-      if(!title) return;
-      const subject = prompt("Materia:");
-      const date = prompt("Fecha (DD/MM/AAAA):");
-      tasks.push({title, subject, date, completed:false});
-      renderTasks();
+  if (addTaskBtn) {
+    addTaskBtn.addEventListener("click", async () => {
+      // Primero obtener las materias disponibles
+      const responseMaterias = await fetch('/api/materias');
+      const dataMaterias = await responseMaterias.json();
+
+      if (!dataMaterias.success || dataMaterias.materias.length === 0) {
+        alert('Primero debes crear materias');
+        return;
+      }
+
+      const titulo = prompt("Nombre de la tarea:");
+      if (!titulo) return;
+
+      const descripcion = prompt("Descripción:");
+      const fecha = prompt("Fecha de entrega (YYYY-MM-DD):");
+
+      // Aquí deberías mostrar un select con las materias, pero para simplificar:
+      const materiaId = dataMaterias.materias[0].id; // Toma la primera materia
+
+      try {
+        const response = await fetch('/api/tareas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            materia_id: materiaId,
+            titulo: titulo,
+            descripcion: descripcion,
+            fecha_entrega: fecha
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Tarea creada exitosamente');
+          renderTasks();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error al crear tarea:', error);
+        alert('Error al crear tarea');
+      }
     });
   }
+
   renderTasks();
 
   /* ==========================
-     CALIFICACIONES / EVALUACIONES
+     EVALUACIONES - Buscar alumno por matrícula
      ========================== */
   const searchBtn = document.getElementById('search-btn');
   const searchInput = document.getElementById('search-boleta');
@@ -218,154 +382,180 @@ document.addEventListener("DOMContentLoaded", () => {
   const nombreAlumnoEl = document.getElementById('nombre-alumno');
   const boletaAlumnoEl = document.getElementById('boleta-alumno');
 
-  if (searchBtn && searchInput && tabla) {
-    // DATOS SIMULADOS DE ALUMNOS
-    const alumnos = {
-      "1234": {
-        nombre: "Kevin Flores",
-        tareas: [
-          { nombre: "Tarea 1", calificacion: 9 },
-          { nombre: "Tarea 2", calificacion: 7 },
-          { nombre: "Tarea 3", calificacion: 8 },
-        ],
-        parciales: [9, 5, 7],
-      },
-      "20231234": {
-        nombre: "José Hernández",
-        tareas: [
-          { nombre: "Tarea 1", calificacion: 10 },
-          { nombre: "Tarea 2", calificacion: 9 },
-        ],
-        parciales: [10, 9, 9],
-      }
-    };
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', async () => {
+      const matricula = searchInput.value.trim();
 
-    // FUNCIÓN AL BUSCAR
-    searchBtn.addEventListener('click', () => {
-      const boleta = searchInput.value.trim();
-      const alumno = alumnos[boleta];
-
-      if (!alumno) {
-        alert('⚠️ No se encontró ningún alumno con esa boleta.');
-        tabla.innerHTML = `<tr><td colspan="4">No se encontró ningún alumno con esa boleta.</td></tr>`;
-        if (promedioEl) promedioEl.innerText = '-';
-        if (alumnoInfo) alumnoInfo.style.display = 'none';
+      if (!matricula) {
+        alert('Por favor ingresa una matrícula');
         return;
       }
 
-      // Mostrar sección del alumno
-      if (alumnoInfo) alumnoInfo.style.display = 'block';
-      if (nombreAlumnoEl) nombreAlumnoEl.textContent = alumno.nombre;
-      if (boletaAlumnoEl) boletaAlumnoEl.textContent = `Boleta: ${boleta}`;
+      try {
+        const response = await fetch(`/api/alumnos/buscar/${matricula}`);
+        const data = await response.json();
 
-      // Generar tabla de tareas
-      let filas = '';
-      alumno.tareas.forEach((t, i) => {
-        filas += `
-          <tr>
-            <td>${t.nombre}</td>
-            <td>--</td>
-            <td><input type="number" class="grade-input" min="0" max="10" value="${t.calificacion}" data-index="${i}" /></td>
-            <td><button class="save-btn" data-index="${i}">Guardar</button></td>
-          </tr>`;
-      });
-      tabla.innerHTML = filas;
+        if (!data.success) {
+          alert('⚠️ No se encontró ningún alumno con esa matrícula.');
+          if (tabla) tabla.innerHTML = `<tr><td colspan="4">No se encontró ningún alumno con esa matrícula.</td></tr>`;
+          if (promedioEl) promedioEl.innerText = '-';
+          if (alumnoInfo) alumnoInfo.style.display = 'none';
+          return;
+        }
 
-      // Calcular promedio
-      const promedio = (alumno.parciales.reduce((a, b) => a + b, 0) / alumno.parciales.length).toFixed(1);
-      if (promedioEl) promedioEl.innerText = promedio;
+        // Mostrar información del alumno
+        if (alumnoInfo) alumnoInfo.style.display = 'block';
+        if (nombreAlumnoEl) nombreAlumnoEl.textContent = data.alumno.nombre;
+        if (boletaAlumnoEl) boletaAlumnoEl.textContent = `Matrícula: ${data.alumno.matricula}`;
 
-      // Botones de guardar calificación
-      document.querySelectorAll('.save-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const index = e.target.dataset.index;
-          const nuevaCal = parseFloat(document.querySelector(`.grade-input[data-index="${index}"]`).value);
-          if (!isNaN(nuevaCal) && nuevaCal >= 0 && nuevaCal <= 10) {
-            alumno.tareas[index].calificacion = nuevaCal;
-            alert('✅ Calificación actualizada');
-          } else {
-            alert('⚠️ Ingresa un valor válido entre 0 y 10');
-          }
-        });
-      });
+        // Por ahora mostrar mensaje de desarrollo
+        if (tabla) {
+          tabla.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align:center; padding:20px;">
+                <p>Sistema de calificaciones en desarrollo</p>
+                <p>Alumno encontrado: <strong>${data.alumno.nombre}</strong></p>
+                <p>Grupo: ${data.alumno.grupo}</p>
+              </td>
+            </tr>
+          `;
+        }
+
+        if (promedioEl) promedioEl.innerText = 'N/A';
+
+      } catch (error) {
+        console.error('Error al buscar alumno:', error);
+        alert('Error al buscar alumno');
+      }
     });
   }
-});
 
-// MATERIAS - Agregar nueva materia (Modal)
-document.addEventListener('DOMContentLoaded', () => {
+  /* ==========================
+     MATERIAS - Agregar nueva materia (Modal)
+     ========================== */
   const btnAgregar = document.querySelector('.btn-green');
   const modal = document.getElementById('modalMateria');
   const form = document.getElementById('formMateria');
   const cancelar = document.getElementById('cancelarMateria');
   const grid = document.querySelector('.materias-grid');
 
-  if (!btnAgregar || !modal || !form) return;
+  if (btnAgregar && modal && form) {
+    // Mostrar modal
+    btnAgregar.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
 
-  // Mostrar modal
-  btnAgregar.addEventListener('click', () => {
-    modal.style.display = 'flex';
-  });
+    // Cerrar modal
+    if (cancelar) {
+      cancelar.addEventListener('click', () => {
+        modal.style.display = 'none';
+        form.reset();
+      });
+    }
 
-  // Cerrar modal
-  cancelar.addEventListener('click', () => {
-    modal.style.display = 'none';
-    form.reset();
-  });
+    // Cerrar si clic fuera del modal
+    window.addEventListener('click', e => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
 
-  // Cerrar si clic fuera del modal
-  window.addEventListener('click', e => {
-    if (e.target === modal) modal.style.display = 'none';
-  });
+    // Validaciones con expresiones regulares
+    const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/;
+    const regexHorario = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s0-9:-]+$/;
 
-  // Validaciones con expresiones regulares
-  const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,20}$/;
-  const regexProfesor = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s\.]{3,30}$/;
-  const regexHorario = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s0-9:-]+$/;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
+      const nombre = document.getElementById('nombreMateria').value.trim();
+      const descripcion = document.getElementById('descripcionMateria')?.value.trim();
+      const horario = document.getElementById('horarioMateria')?.value.trim();
 
-    const nombre = document.getElementById('nombreMateria').value.trim();
-    const descripcion = document.getElementById('descripcionMateria').value.trim();
-    const profesor = document.getElementById('profesorMateria').value.trim();
-    const horario = document.getElementById('horarioMateria').value.trim();
+      if (!regexNombre.test(nombre)) {
+        alert('El nombre solo puede contener letras (máx. 50 caracteres).');
+        return;
+      }
 
-    if (!regexNombre.test(nombre)) return alert('El nombre solo puede contener letras (máx. 20 caracteres).');
-    if (!regexProfesor.test(profesor)) return alert('El nombre del profesor no es válido.');
-    if (!regexHorario.test(horario)) return alert('El horario contiene caracteres inválidos.');
+      if (horario && !regexHorario.test(horario)) {
+        alert('El horario contiene caracteres inválidos.');
+        return;
+      }
 
-    const nuevaMateria = document.createElement('div');
-    nuevaMateria.classList.add('materia-card');
-    nuevaMateria.innerHTML = `
-      <div class="materia-header">
-        <div class="materia-title">
-          <div class="materia-icon" style="background-color: var(--accent);">
-            <i class="ri-book-2-line"></i>
-          </div>
-          <h3>${nombre}</h3>
-        </div>
-        <div class="materia-actions">
-          <i class="ri-edit-line"></i>
-          <i class="ri-delete-bin-line"></i>
-        </div>
-      </div>
-      <p class="materia-desc">${descripcion}</p>
-      <div class="materia-profesor">
-        <i class="ri-user-3-line"></i> <span>${profesor}</span>
-      </div>
-      <div class="materia-calendario">
-        <i class="ri-calendar-line"></i> ${horario}
-      </div>
-      <div class="materia-footer">
-        <span class="materia-estado estado-activa">Activa</span>
-        <span class="materia-fecha">Inicio: ${new Date().toLocaleDateString()}</span>
-      </div>
-    `;
-    grid.appendChild(nuevaMateria);
+      try {
+        const response = await fetch('/api/materias', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            nombre: nombre,
+            descripcion: descripcion,
+            horario: horario
+          })
+        });
 
-    lucide.createIcons();
-    modal.style.display = 'none';
-    form.reset();
-  });
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Materia creada exitosamente');
+          modal.style.display = 'none';
+          form.reset();
+          cargarMaterias(); // Recargar las materias
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error al crear materia:', error);
+        alert('Error al crear materia');
+      }
+    });
+  }
+
+  // Cargar materias en la página de materias
+  async function cargarMaterias() {
+    if (!grid) return;
+
+    try {
+      const response = await fetch('/api/materias');
+      const data = await response.json();
+
+      grid.innerHTML = '';
+
+      if (data.success && data.materias.length > 0) {
+        data.materias.forEach(materia => {
+          const div = document.createElement('div');
+          div.classList.add('materia-card');
+          div.innerHTML = `
+            <div class="materia-header">
+              <div class="materia-title">
+                <div class="materia-icon" style="background-color: var(--accent);">
+                  <i class="ri-book-2-line"></i>
+                </div>
+                <h3>${materia.nombre}</h3>
+              </div>
+              <div class="materia-actions">
+                <i class="ri-edit-line"></i>
+                <i class="ri-delete-bin-line"></i>
+              </div>
+            </div>
+            <div class="materia-profesor">
+              <i class="ri-user-3-line"></i> <span>${materia.nombre_profesor || 'Sin profesor asignado'}</span>
+            </div>
+            <div class="materia-footer">
+              <span class="materia-estado estado-activa">Activa</span>
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+      } else {
+        grid.innerHTML = '<p style="text-align:center; color:#999;">No hay materias registradas</p>';
+      }
+    } catch (error) {
+      console.error('Error al cargar materias:', error);
+      grid.innerHTML = '<p style="text-align:center; color:red;">Error al cargar materias</p>';
+    }
+  }
+
+  cargarMaterias();
+
+  // Inicializar Lucide icons
+  lucide.createIcons();
 });
