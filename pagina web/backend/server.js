@@ -224,36 +224,90 @@ app.get('/api/materias', verificarAutenticacion, (req, res) => {
     });
 });
 
-// Crear nueva materia (solo profesores)
+// Crear nueva materia
 app.post('/api/materias', verificarAutenticacion, (req, res) => {
-    if (req.session.usuario.tipo !== 'profesor') {
-        return res.status(403).json({ success: false, message: "No autorizado" });
+    const { nombre, descripcion, profesor, horario } = req.body;
+
+    if (!nombre) {
+        return res.status(400).json({ success: false, message: "El nombre es obligatorio" });
     }
 
+    // Si es profesor, obtener su ID
+    if (req.session.usuario.tipo === 'profesor') {
+        db.query(
+            'SELECT id FROM profesores WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err || results.length === 0) {
+                    return res.status(500).json({ success: false, message: "Error al obtener datos del profesor" });
+                }
+
+                const profesorId = results[0].id;
+
+                db.query(
+                    'INSERT INTO materias (nombre, profesor_id, descripcion, horario) VALUES (?, ?, ?, ?)',
+                    [nombre, profesorId, descripcion, horario],
+                    (err, result) => {
+                        if (err) {
+                            console.error("Error al crear materia:", err);
+                            return res.status(500).json({ success: false, message: "Error al crear materia" });
+                        }
+                        res.json({ success: true, message: "Materia creada exitosamente", id: result.insertId });
+                    }
+                );
+            }
+        );
+    } else {
+        // Para alumnos, crear materia sin profesor asignado
+        db.query(
+            'INSERT INTO materias (nombre, descripcion, horario) VALUES (?, ?, ?)',
+            [nombre, descripcion, horario],
+            (err, result) => {
+                if (err) {
+                    console.error("Error al crear materia:", err);
+                    return res.status(500).json({ success: false, message: "Error al crear materia" });
+                }
+                res.json({ success: true, message: "Materia creada exitosamente", id: result.insertId });
+            }
+        );
+    }
+});
+
+// Actualizar materia
+app.put('/api/materias/:id', verificarAutenticacion, (req, res) => {
+    const { id } = req.params;
     const { nombre, descripcion, horario } = req.body;
 
-    // Obtener el profesor_id del usuario actual
+    if (!nombre || !horario) {
+        return res.status(400).json({ success: false, message: "Nombre y horario son obligatorios" });
+    }
+
     db.query(
-        'SELECT id FROM profesores WHERE usuario_id = ?',
-        [req.session.usuario.id],
-        (err, results) => {
-            if (err || results.length === 0) {
-                return res.status(500).json({ success: false, message: "Error al obtener datos del profesor" });
+        'UPDATE materias SET nombre = ?, descripcion = ?, horario = ? WHERE id = ?',
+        [nombre, descripcion, horario, id],
+        (err, result) => {
+            if (err) {
+                console.error("Error al actualizar materia:", err);
+                return res.status(500).json({ success: false, message: "Error al actualizar materia" });
             }
+            res.json({ success: true, message: "Materia actualizada exitosamente" });
+        }
+    );
+});
 
-            const profesorId = results[0].id;
+// Eliminar materia
+app.delete('/api/materias/:id', verificarAutenticacion, (req, res) => {
+    const { id } = req.params;
 
-            db.query(
-                'INSERT INTO materias (nombre, profesor_id) VALUES (?, ?)',
-                [nombre, profesorId],
-                (err, result) => {
-                    if (err) {
-                        console.error("Error al crear materia:", err);
-                        return res.status(500).json({ success: false, message: "Error al crear materia" });
-                    }
-                    res.json({ success: true, message: "Materia creada exitosamente", id: result.insertId });
-                }
-            );
+    db.query(
+        'DELETE FROM materias WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) {
+                console.error("Error al eliminar materia:", err);
+                return res.status(500).json({ success: false, message: "Error al eliminar materia" });
+            }
+            res.json({ success: true, message: "Materia eliminada exitosamente" });
         }
     );
 });
@@ -318,6 +372,83 @@ app.post('/api/tareas', verificarAutenticacion, (req, res) => {
                 return res.status(500).json({ success: false, message: "Error al crear tarea" });
             }
             res.json({ success: true, message: "Tarea creada exitosamente", id: result.insertId });
+        }
+    );
+});
+
+// Actualizar tarea
+app.put('/api/tareas/:id', verificarAutenticacion, (req, res) => {
+    if (req.session.usuario.tipo !== 'profesor') {
+        return res.status(403).json({ success: false, message: "No autorizado" });
+    }
+
+    const { id } = req.params;
+    const { materia_id, titulo, descripcion, fecha_entrega } = req.body;
+
+    db.query(
+        'UPDATE tareas SET materia_id = ?, titulo = ?, descripcion = ?, fecha_entrega = ? WHERE id = ?',
+        [materia_id, titulo, descripcion, fecha_entrega, id],
+        (err, result) => {
+            if (err) {
+                console.error("Error al actualizar tarea:", err);
+                return res.status(500).json({ success: false, message: "Error al actualizar tarea" });
+            }
+            res.json({ success: true, message: "Tarea actualizada exitosamente" });
+        }
+    );
+});
+
+// Eliminar tarea
+app.delete('/api/tareas/:id', verificarAutenticacion, (req, res) => {
+    if (req.session.usuario.tipo !== 'profesor') {
+        return res.status(403).json({ success: false, message: "No autorizado" });
+    }
+
+    const { id } = req.params;
+
+    db.query(
+        'DELETE FROM tareas WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) {
+                console.error("Error al eliminar tarea:", err);
+                return res.status(500).json({ success: false, message: "Error al eliminar tarea" });
+            }
+            res.json({ success: true, message: "Tarea eliminada exitosamente" });
+        }
+    );
+});
+
+// Marcar tarea como completada
+app.put('/api/tareas/:id/completar', verificarAutenticacion, (req, res) => {
+    const { id } = req.params;
+
+    db.query(
+        'UPDATE tareas SET estado = "completada" WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) {
+                console.error("Error al completar tarea:", err);
+                return res.status(500).json({ success: false, message: "Error al completar tarea" });
+            }
+            res.json({ success: true, message: "Tarea marcada como completada" });
+        }
+    );
+});
+
+// Deshacer tarea completada (volver a pendiente)
+app.put('/api/tareas/:id/deshacer', verificarAutenticacion, (req, res) => {
+    const { id } = req.params;
+
+    db.query(
+        'UPDATE tareas SET estado = "pendiente" WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) {
+                console.error("Error al deshacer tarea:", err);
+                return res.status(500).json({ success: false, message: "Error al deshacer tarea" });
+            }
+            res.json({ success: true, message: "Tarea marcada como pendiente" });
         }
     );
 });
@@ -390,31 +521,145 @@ app.get('/api/alumnos/buscar/:matricula', verificarAutenticacion, (req, res) => 
 });
 
 // ========================================
+// API ENDPOINTS - PROGRESO
+// ========================================
+
+// Obtener progreso del usuario
+app.get('/api/progreso', verificarAutenticacion, (req, res) => {
+    const usuarioId = req.session.usuario.id;
+
+    // Por ahora retornamos datos básicos
+    // En el futuro se pueden agregar logros, estadísticas, etc.
+    res.json({
+        success: true,
+        usuario: req.session.usuario,
+        logros: [],
+        skins: [],
+        estadisticas: {
+            racha: 0,
+            tareasCompletadas: 0,
+            materiasInscritas: 0
+        }
+    });
+});
+
+// ========================================
 // VISTAS PROTEGIDAS
 // ========================================
 
 app.get('/index', verificarAutenticacion, (req, res) => {
-    res.render('index', { usuario: req.session.usuario });
+    // Obtener información adicional del usuario
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('index', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('index', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('index', { usuario: req.session.usuario });
+    }
 });
 
 app.get('/materias', verificarAutenticacion, (req, res) => {
-    res.render('materias', { usuario: req.session.usuario });
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('materias', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('materias', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('materias', { usuario: req.session.usuario });
+    }
 });
 
 app.get('/tareas', verificarAutenticacion, (req, res) => {
-    res.render('tareas', { usuario: req.session.usuario });
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('tareas', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('tareas', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('tareas', { usuario: req.session.usuario });
+    }
 });
 
 app.get('/evaluaciones', verificarAutenticacion, (req, res) => {
-    res.render('evaluaciones', { usuario: req.session.usuario });
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('evaluaciones', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('evaluaciones', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('evaluaciones', { usuario: req.session.usuario });
+    }
 });
 
 app.get('/progreso', verificarAutenticacion, (req, res) => {
-    res.render('progreso', { usuario: req.session.usuario });
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('progreso', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('progreso', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('progreso', { usuario: req.session.usuario });
+    }
 });
 
 app.get('/profesores', verificarAutenticacion, (req, res) => {
-    res.render('profesores', { usuario: req.session.usuario });
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('profesores', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('profesores', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('profesores', { usuario: req.session.usuario });
+    }
 });
 
 // === INICIAR SERVIDOR ===
