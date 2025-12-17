@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tareas - Recua</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/tareas.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+    <h1>Tareas</h1>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <ul>
+      <li onclick="location.href='index.html'"><i class="ri-home-5-line"></i> Home</li>
+      <li onclick="location.href='tareas.html'"><i class="ri-task-line"></i> Tareas</li>
+      <li onclick="location.href='materias.html'"><i class="ri-book-2-line"></i> Materias</li>
+      <li onclick="location.href='calificaciones.html'"><i class="ri-bar-chart-2-line"></i> Calificaciones</li>
+    </ul>
+
+    <hr>
+
+    <!-- Perfil dentro del sidebar -->
+    <div class="user-sidebar">
+      <div class="user-main" id="userMain">
+        <img src="img/kevin.jpg" alt="<%= usuario.nombre %>" class="user-img">
+        <p id="sidebar-username-main">
+          <%= usuario.nombre %>
+        </p>
+      </div>
+      <div class="user-info-sidebar" id="userInfoSidebar">
+        <p id="sidebar-username">
+          <%= usuario.nombre %>
+        </p>
+        <p id="sidebar-email">
+          <%= usuario.correo %>
+        </p>
+        <p id="sidebar-role">
+          <%= usuario.tipo==='alumno' ? 'Estudiante' : 'Profesor' %>
+        </p>
+        <% if (usuario.tipo==='alumno' && usuario.matricula) { %>
+          <p id="sidebar-matricula">Matrícula: <%= usuario.matricula %>
+          </p>
+          <% } %>
+            <% if (usuario.tipo==='profesor' && usuario.numero_empleado) { %>
+              <p id="sidebar-empleado">No. Empleado: <%= usuario.numero_empleado %>
+              </p>
+              <% } %>
+                <button id="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="tareas-header">
+      <div>
+        <h1>Mis tareas</h1>
+        <p>Revisa tus tareas pendientes y su fecha límite</p>
+      </div>
+      <% if (usuario.tipo==='profesor' ) { %>
+        <button class="btn-green" id="agregarTarea">Agregar tarea</button>
+        <% } %>
+    </div>
+
+    <div class="tareas-grid" id="tareasContainer">
+      <!-- Las tareas se cargarán dinámicamente -->
+    </div>
+  </main>
+
+  <!-- MODAL PARA AGREGAR/EDITAR TAREA -->
+  <div class="modal-overlay" id="modal" style="display: none;">
+    <div class="modal">
+      <h2 id="modal-title">Nueva Tarea</h2>
+      <select id="materia"
+        style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-family: 'Poppins', sans-serif;">
+        <option value="">Selecciona una materia</option>
+      </select>
+      <input type="text" id="titulo" placeholder="Título de la tarea">
+      <textarea id="descripcion" placeholder="Descripción" rows="3"
+        style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-family: 'Poppins', sans-serif; resize: vertical;"></textarea>
+      <input type="date" id="fecha_entrega">
+      <div class="modal-buttons">
+        <button class="btn btn-gray" id="cancelarBtn">Cancelar</button>
+        <button class="btn btn-green" id="guardarBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 15px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal input,
+    .modal textarea,
+    .modal select {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .modal input:focus,
+    .modal textarea:focus,
+    .modal select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 4px var(--primary);
+      outline: none;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-green {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-green:hover {
+      background: var(--primary);
+    }
+
+    .btn-gray {
+      background: #ccc;
+      color: #212121;
+    }
+
+    .btn-gray:hover {
+      background: #bdbdbd;
+    }
+
+    .btn-red {
+      background: #f44336;
+      color: #fff;
+    }
+
+    .btn-red:hover {
+      background: #d32f2f;
+    }
+  </style>
+
+  <script src="./js/scripts.js"></script>
+  <script>
+    lucide.createIcons();
+
+    // Función para cerrar sesión
+    function cerrarSesion() {
+      fetch('/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/signup';
+          }
+        })
+        .catch(error => {
+          console.error('Error al cerrar sesión:', error);
+        });
+    }
+
+    const tareasContainer = document.getElementById('tareasContainer');
+    const modal = document.getElementById('modal');
+    const btnAgregar = document.getElementById('agregarTarea');
+    const btnGuardar = document.getElementById('guardarBtn');
+    const btnCancelar = document.getElementById('cancelarBtn');
+    const modalTitle = document.getElementById('modal-title');
+    const materiaSelect = document.getElementById('materia');
+    const tituloInput = document.getElementById('titulo');
+    const descripcionInput = document.getElementById('descripcion');
+    const fechaInput = document.getElementById('fecha_entrega');
+
+    let editId = null;
+    const esProfesor = '<%= usuario.tipo %>' === 'profesor';
+
+    // Cargar materias para el select
+    async function cargarMaterias() {
+      try {
+        const response = await fetch('/api/materias');
+        const data = await response.json();
+
+        if (data.success) {
+          materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
+          data.materias.forEach(materia => {
+            const option = document.createElement('option');
+            option.value = materia.id;
+            option.textContent = materia.nombre;
+            materiaSelect.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar materias:', error);
+      }
+    }
+
+    // Cargar tareas desde la API
+    async function cargarTareas() {
+      try {
+        const response = await fetch('/api/tareas');
+        const data = await response.json();
+
+        if (data.success) {
+          renderTareas(data.tareas);
+        }
+      } catch (error) {
+        console.error('Error al cargar tareas:', error);
+      }
+    }
+
+    function renderTareas(tareas) {
+      tareasContainer.innerHTML = '';
+
+      if (tareas.length === 0) {
+        tareasContainer.innerHTML = '<p style="text-align: center; color: #666;">No hay tareas registradas</p>';
+        return;
+      }
+
+      tareas.forEach(tarea => {
+        const card = document.createElement('div');
+        card.classList.add('tarea-card');
+
+        const fechaEntrega = new Date(tarea.fecha_entrega).toLocaleDateString('es-MX', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+
+        const estado = tarea.estado || 'pendiente';
+        const estadoClass = estado === 'completada' ? 'completada' : 'pendiente';
+        const estadoTexto = estado === 'completada' ? 'Completada' : 'Pendiente';
+
+        card.innerHTML = `
+          <div class="tarea-header">
+            <h3>${tarea.titulo}</h3>
+            <span class="estado ${estadoClass}">${estadoTexto}</span>
+          </div>
+          <p>${tarea.descripcion || 'Sin descripción'}</p>
+          <p><strong>Materia:</strong> ${tarea.materia_nombre || 'Sin materia'}</p>
+          <p><strong>Fecha de entrega:</strong> ${fechaEntrega}</p>
+          <div class="tarea-footer" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+            ${estado !== 'completada' ? `
+              <button class="btn-entregar" onclick="marcarCompletada(${tarea.id})">
+                Marcar como completada
+              </button>
+            ` : `
+              <button class="btn-entregar" style="background: #4caf50;" onclick="deshacerCompletada(${tarea.id})">
+                Deshacer completada
+              </button>
+            `}
+            ${esProfesor ? `
+              <button class="btn btn-gray" onclick="editarTarea(${tarea.id})" style="padding: 0.5rem 1rem;">
+                Editar
+              </button>
+              <button class="btn btn-red" onclick="eliminarTarea(${tarea.id})" style="padding: 0.5rem 1rem;">
+                Eliminar
+              </button>
+            ` : ''}
+          </div>
+        `;
+
+        tareasContainer.appendChild(card);
+      });
+    }
+
+    // Abrir modal para agregar tarea
+    if (btnAgregar) {
+      btnAgregar.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        modalTitle.textContent = 'Nueva Tarea';
+        materiaSelect.value = '';
+        tituloInput.value = '';
+        descripcionInput.value = '';
+        fechaInput.value = '';
+        editId = null;
+      });
+    }
+
+    // Cancelar modal
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    }
+
+    // Guardar tarea
+    if (btnGuardar) {
+      btnGuardar.addEventListener('click', async () => {
+        const materia_id = materiaSelect.value;
+        const titulo = tituloInput.value.trim();
+        const descripcion = descripcionInput.value.trim();
+        const fecha_entrega = fechaInput.value;
+
+        if (!materia_id || !titulo || !fecha_entrega) {
+          alert('Por favor completa todos los campos obligatorios');
+          return;
+        }
+
+        try {
+          const url = editId ? `/api/tareas/${editId}` : '/api/tareas';
+          const method = editId ? 'PUT' : 'POST';
+
+          const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ materia_id, titulo, descripcion, fecha_entrega })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            modal.style.display = 'none';
+            cargarTareas();
+          } else {
+            alert(data.message || 'Error al guardar tarea');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error al guardar tarea');
+        }
+      });
+    }
+
+    // Editar tarea
+    window.editarTarea = async function (id) {
+      try {
+        const response = await fetch('/api/tareas');
+        const data = await response.json();
+
+        if (data.success) {
+          const tarea = data.tareas.find(t => t.id === id);
+          if (!tarea) return;
+
+          modal.style.display = 'flex';
+          modalTitle.textContent = 'Editar Tarea';
+          materiaSelect.value = tarea.materia_id;
+          tituloInput.value = tarea.titulo;
+          descripcionInput.value = tarea.descripcion || '';
+          fechaInput.value = tarea.fecha_entrega.split('T')[0];
+          editId = id;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    // Eliminar tarea
+    window.eliminarTarea = async function (id) {
+      if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;
+
+      try {
+        const response = await fetch(`/api/tareas/${id}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          cargarTareas();
+        } else {
+          alert(data.message || 'Error al eliminar tarea');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar tarea');
+      }
+    };
+
+    // Marcar como completada
+    window.marcarCompletada = async function (id) {
+      try {
+        const response = await fetch(`/api/tareas/${id}/completar`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          cargarTareas();
+        } else {
+          alert(data.message || 'Error al actualizar tarea');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al actualizar tarea');
+      }
+    };
+
+    // Deshacer tarea completada
+    window.deshacerCompletada = async function (id) {
+      try {
+        const response = await fetch(`/api/tareas/${id}/deshacer`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          cargarTareas();
+        } else {
+          alert(data.message || 'Error al actualizar tarea');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al actualizar tarea');
+      }
+    };
+
+    // Cargar datos al iniciar
+    cargarMaterias();
+    cargarTareas();
+  </script>
+</body>
+
+</html>

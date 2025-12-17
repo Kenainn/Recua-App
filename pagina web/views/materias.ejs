@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Materias - Recua</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ----- ENCABEZADO ----- */
+    .materias-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .materias-header h1 {
+      color: var(--secondary);
+    }
+
+    /* ----- GRID DE MATERIAS ----- */
+    .materias-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .materia-card {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .materia-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .materia-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .materia-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .materia-icon {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .materia-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .materia-actions i {
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--text);
+      transition: color 0.3s ease;
+    }
+
+    .materia-actions i:hover {
+      color: var(--secondary);
+    }
+
+    .materia-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .estado-activa {
+      color: var(--secondary);
+      color: white;
+      font-weight: 600;
+    }
+
+    /* ----- MODAL ----- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 15px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal input {
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .modal input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 4px var(--primary);
+      outline: none;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-green {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-green:hover {
+      background: var(--primary);
+    }
+
+    .btn-gray {
+      background: #ccc;
+      color: #212121;
+    }
+
+    .btn-gray:hover {
+      background: #bdbdbd;
+    }
+
+    /* ----- DIAS SELECTOR ----- */
+    .days-selector {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 5px;
+    }
+
+    .day-btn {
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #f9f9f9;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .day-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .time-inputs {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .time-inputs input {
+      flex: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+    <h1>Materias</h1>
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <ul></ul>
+    <hr>
+
+    <div class="user-sidebar">
+      <div class="user-main" id="userMain">
+        <img src="../recuaimg/pfp prueba.jpg" alt="Usuario" class="user-img">
+        <p id="sidebar-username-main">
+          <%= usuario.nombre %>
+        </p>
+      </div>
+
+      <div class="user-info-sidebar" id="userInfoSidebar">
+        <p id="sidebar-username">
+          <%= usuario.nombre %>
+        </p>
+        <p id="sidebar-email">
+          <%= usuario.correo %>
+        </p>
+        <p id="sidebar-role">
+          <%= usuario.tipo==='alumno' ? 'Alumno' : 'Profesor' %>
+        </p>
+        <button id="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+      </div>
+    </div>
+
+    <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="materias-header">
+      <div>
+        <h1>Materias inscritas</h1>
+        <p>Consulta tus materias activas o agrega nuevas</p>
+      </div>
+      <button id="agregarMateria" class="btn btn-green">Agregar Materia</button>
+    </div>
+
+    <div class="materias-grid" id="materiasContainer"></div>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2 id="modal-title">Nueva Materia</h2>
+      <input type="text" id="nombre" placeholder="Nombre de la materia">
+      <input type="text" id="descripcion" placeholder="Descripción">
+      <input type="text" id="profesor" placeholder="Profesor">
+
+      <label style="font-size: 0.9rem; font-weight: 600; margin-top: 5px;">Horario:</label>
+      <div class="days-selector" id="daysSelector">
+        <button class="day-btn" data-day="Lun">Lun</button>
+        <button class="day-btn" data-day="Mar">Mar</button>
+        <button class="day-btn" data-day="Mié">Mié</button>
+        <button class="day-btn" data-day="Jue">Jue</button>
+        <button class="day-btn" data-day="Vie">Vie</button>
+        <button class="day-btn" data-day="Sáb">Sáb</button>
+        <button class="day-btn" data-day="Dom">Dom</button>
+      </div>
+      <div class="time-inputs">
+        <input type="time" id="horaInicio">
+        <span>a</span>
+        <input type="time" id="horaFin">
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn btn-gray" id="cancelarBtn">Cancelar</button>
+        <button class="btn btn-green" id="guardarBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    // Función para cerrar sesión
+    function cerrarSesion() {
+      fetch('/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/signup';
+          }
+        })
+        .catch(error => {
+          console.error('Error al cerrar sesión:', error);
+        });
+    }
+
+    const materiasContainer = document.getElementById("materiasContainer");
+    const modal = document.getElementById("modal");
+    const btnAgregar = document.getElementById("agregarMateria");
+    const btnGuardar = document.getElementById("guardarBtn");
+    const btnCancelar = document.getElementById("cancelarBtn");
+    const modalTitle = document.getElementById("modal-title");
+    const nombreInput = document.getElementById("nombre");
+    const descripcionInput = document.getElementById("descripcion");
+    const profesorInput = document.getElementById("profesor");
+
+    // Elementos del nuevo selector de horario
+    const daysSelector = document.getElementById("daysSelector");
+    const horaInicioInput = document.getElementById("horaInicio");
+    const horaFinInput = document.getElementById("horaFin");
+
+    let materias = [];
+    let editId = null;
+
+    // Manejo de clicks en los botones de días
+    daysSelector.addEventListener("click", (e) => {
+      if (e.target.classList.contains("day-btn")) {
+        e.target.classList.toggle("active");
+      }
+    });
+
+    function getHorarioString() {
+      const selectedDays = Array.from(document.querySelectorAll(".day-btn.active"))
+        .map(btn => btn.dataset.day);
+      const inicio = horaInicioInput.value;
+      const fin = horaFinInput.value;
+
+      if (selectedDays.length === 0 || !inicio || !fin) return "";
+      return `${selectedDays.join(", ")} | ${inicio} - ${fin}`;
+    }
+
+    function setHorarioFields(horarioStr) {
+      // Limpiar campos
+      document.querySelectorAll(".day-btn").forEach(btn => btn.classList.remove("active"));
+      horaInicioInput.value = "";
+      horaFinInput.value = "";
+
+      if (!horarioStr) return;
+
+      try {
+        const parts = horarioStr.split(" | ");
+        if (parts.length === 2) {
+          const days = parts[0].split(", ");
+          days.forEach(day => {
+            const btn = Array.from(document.querySelectorAll(".day-btn"))
+              .find(b => b.dataset.day === day);
+            if (btn) btn.classList.add("active");
+          });
+
+          const times = parts[1].split(" - ");
+          if (times.length === 2) {
+            horaInicioInput.value = times[0];
+            horaFinInput.value = times[1];
+          }
+        }
+      } catch (e) {
+        console.error("Error al parsear horario:", e);
+      }
+    }
+
+    // Cargar materias desde la API
+    async function cargarMaterias() {
+      try {
+        const response = await fetch('/api/materias');
+        const data = await response.json();
+        if (data.success) {
+          materias = data.materias;
+          renderMaterias();
+        }
+      } catch (error) {
+        console.error('Error al cargar materias:', error);
+      }
+    }
+
+    btnAgregar.addEventListener("click", () => {
+      modal.style.display = "flex";
+      modalTitle.textContent = "Nueva Materia";
+      nombreInput.value = "";
+      descripcionInput.value = "";
+      profesorInput.value = "";
+      setHorarioFields("");
+      editId = null;
+    });
+
+    btnCancelar.addEventListener("click", () => modal.style.display = "none");
+
+    btnGuardar.addEventListener("click", async () => {
+      const nombre = nombreInput.value.trim();
+      const descripcion = descripcionInput.value.trim();
+      const profesor = profesorInput.value.trim();
+      const horario = getHorarioString();
+
+      if (!nombre) {
+        alert('El nombre de la materia es obligatorio');
+        return;
+      }
+      if (!horario) {
+        alert('Debes seleccionar al menos un día y el rango de horas');
+        return;
+      }
+
+      try {
+        const url = editId ? `/api/materias/${editId}` : '/api/materias';
+        const method = editId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, descripcion, profesor, horario })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          modal.style.display = "none";
+          cargarMaterias();
+        } else {
+          alert(data.message || 'Error al guardar materia');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al guardar materia');
+      }
+    });
+
+    function renderMaterias() {
+      materiasContainer.innerHTML = "";
+      materias.forEach((m) => {
+        const card = document.createElement("div");
+        card.classList.add("materia-card");
+        const fecha = m.created_at ? new Date(m.created_at).toLocaleDateString() : 'N/A';
+        card.innerHTML = `
+          <div class="materia-header">
+            <div class="materia-title">
+              <div class="materia-icon"><i data-lucide="book-open"></i></div>
+              <h3>${m.nombre}</h3>
+            </div>
+            <div class="materia-actions">
+              <i data-lucide="edit-3" onclick="editarMateria(${m.id})"></i>
+              <i data-lucide="trash-2" onclick="eliminarMateria(${m.id})"></i>
+            </div>
+          </div>
+          <p>${m.descripcion || 'Sin descripción'}</p>
+          <p><i data-lucide="user"></i> ${m.nombre_profesor || 'Sin asignar'}</p>
+          <p><i data-lucide="clock"></i> ${m.horario || 'Sin horario'}</p>
+          <div class="materia-footer">
+            <span class="estado-activa" style="padding: 4px 8px; background: var(--accent); border-radius: 8px;">Activa</span>
+            <span>Inicio: ${fecha}</span>
+          </div>
+        `;
+        materiasContainer.appendChild(card);
+      });
+      // Re-renderizar iconos de Lucide
+      lucide.createIcons();
+    }
+
+    window.editarMateria = async function (id) {
+      const m = materias.find(mat => mat.id === id);
+      if (!m) return;
+
+      modal.style.display = "flex";
+      modalTitle.textContent = "Editar Materia";
+      nombreInput.value = m.nombre;
+      descripcionInput.value = m.descripcion || '';
+      profesorInput.value = m.nombre_profesor || '';
+      setHorarioFields(m.horario || "");
+      editId = id;
+    };
+
+    window.eliminarMateria = async function (id) {
+      if (!confirm('¿Estás seguro de eliminar esta materia?')) return;
+
+      try {
+        const response = await fetch(`/api/materias/${id}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          cargarMaterias();
+        } else {
+          alert(data.message || 'Error al eliminar materia');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al eliminar materia');
+      }
+    };
+
+    // Cargar materias al iniciar
+    cargarMaterias();
+  </script>
+</body>
+<script src="./js/scripts.js"></script>
+
+</html>

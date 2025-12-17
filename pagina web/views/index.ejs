@@ -14,7 +14,9 @@
 
   <!-- Navbar -->
   <nav class="navbar">
-    <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+    <button id="toggleSidebar" class="sidebar-toggle">
+      <i data-lucide="menu"></i>
+    </button>
     <h1>Recua Dashboard</h1>
   </nav>
 
@@ -22,7 +24,7 @@
   <aside class="sidebar" id="sidebar">
     <ul></ul>
     <hr>
-    <!-- Perfil dentro del sidebar -->
+
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
         <img src="../recuaimg/pfp prueba.jpg" alt="Usuario" class="user-img">
@@ -30,6 +32,7 @@
           <%= usuario.nombre %>
         </p>
       </div>
+
       <div class="user-info-sidebar" id="userInfoSidebar">
         <p id="sidebar-username">
           <%= usuario.nombre %>
@@ -43,131 +46,223 @@
         <button id="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
       </div>
     </div>
+
     <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
   </aside>
 
-  <!-- Main content -->
+  <!-- Main -->
   <main class="main">
 
-    <!-- Streak / Yak -->
     <section class="streak">
       <div class="streak-header">
         <h1>¡Hola, <span id="username">
             <%= usuario.nombre.split(' ')[0] %></span>! 👋</h1>
-      <p class="streak-subtitle">¿Listo para seguir aprendiendo con Yak?</p>
-    </div>
-    <div class="streak-cards horizontal-layout">
-      <div class="card yak-card">
-        <div class="yak-bg">
-        <!--<div class="yak-level" id="yak-level">1</div>-->
-          <img src="../recuaimg/fondo/YAK BASE.png" alt="Yak">
-        </div>
-        <div class="yak-exp-bar">
-          <div class="exp-fill" id="exp-fill"></div>
-        </div>
-        <p class="exp-text" id="exp-text">0 / 200 exp</p>
+        <p class="streak-subtitle">¿Listo para seguir aprendiendo con Yak?</p>
       </div>
-      
-      <div class="card white-card horizontal-card">
-        <div class="stat horizontal">
-          <i data-lucide="flame" style="color:orange;"></i>
-          <div><span id="current-streak">0</span> Racha Actual</div>
+
+      <div class="streak-cards horizontal-layout">
+
+        <div class="card yak-card">
+          <div class="yak-bg">
+            <img src="../recuaimg/fondo/YAK BASE.png" alt="Yak">
+          </div>
+          <div class="yak-exp-bar">
+            <div class="exp-fill" id="exp-fill"></div>
+          </div>
+          <p class="exp-text" id="exp-text">0 / 200 exp</p>
         </div>
-        <div class="stat horizontal">
-          <i data-lucide="award" style="color:gold;"></i>
-          <div><span id="best-streak">0</span> Mejor Racha</div>
+
+        <div class="card white-card horizontal-card">
+          <div class="stat horizontal">
+            <i data-lucide="flame" style="color:orange;"></i>
+            <div><span id="current-streak">0</span> Racha Actual</div>
+          </div>
+          <div class="stat horizontal">
+            <i data-lucide="award" style="color:gold;"></i>
+            <div><span id="best-streak">0</span> Mejor Racha</div>
+          </div>
+        </div>
+
+        <div class="card white-card horizontal-card">
+          <div class="stat horizontal">
+            <i data-lucide="book-open" style="color:#2196f3;"></i>
+            <div><span id="subjects-count">0</span> Materias Activas</div>
+          </div>
+        </div>
+
+        <div class="card white-card horizontal-card">
+          <div class="stat horizontal">
+            <i data-lucide="check-square" style="color:green;"></i>
+            <div><span id="tasks-progress">0</span> Tareas Completadas</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="dashboard-lower" style="display:flex; gap:16px; flex-wrap:wrap; margin-top:20px;">
+
+      <div class="tasks-board" style="flex:2; display:flex; flex-direction:column;">
+        <h2>
+          <i data-lucide="calendar" style="color:green;"></i> Tareas de hoy
+        </h2>
+        <div id="tasks-today" class="tasks-today-container"
+          style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
         </div>
       </div>
 
-      <div class="card white-card horizontal-card">
-        <div class="stat horizontal">
-          <i data-lucide="book-open" style="color:#2196f3;"></i>
-          <div><span id="subjects-count">0</span> Materias Activas</div>
+      <div class="right-cards" style="flex:1; display:flex; flex-direction:column; gap:16px;">
+
+        <div class="card white-card">
+          <h3>Próximas Tareas</h3>
+          <ul id="upcoming-tasks" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
-      </div>
 
-      <div class="card white-card horizontal-card">
-        <div class="stat horizontal">
-          <i data-lucide="check-square" style="color:green;"></i>
-          <div><span id="tasks-progress">0</span> Tareas Completadas</div>
+        <div class="card white-card">
+          <h3>Mis Materias</h3>
+          <ul id="my-subjects" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Lower dashboard -->
-  <div class="dashboard-lower" style="display:flex; gap:16px; flex-wrap:wrap; margin-top:20px;">
-
-    <!-- Tablon de tareas -->
-    <div class="tasks-board" style="flex:2; display:flex; flex-direction:column;">
-      <h2 style="display:flex; justify-content:space-between; align-items:center;">
-        <span><i data-lucide="calendar" style="color:green;"></i> Tareas de hoy</span>
-      </h2>
-      <!-- Contenedor de tarjetas de tareas -->
-      <div id="tasks-today" class="tasks-today-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-        <!-- Las tareas se inyectarán dinámicamente -->
-      </div>
-      <!-- Boton ver todas a la derecha -->
-      <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-      </div>
-    </div>
-
-    <!-- Recuadros derecho -->
-    <div class="right-cards" style="flex:1; display:flex; flex-direction:column; gap:16px;">
-      <div class="card white-card">
-        <h3>Próximas Tareas</h3>
-        <ul id="upcoming-tasks" style="list-style:none; padding:0; margin:0;">
-        </ul>
-      </div>
-
-      <div class="card white-card">
-        <h3>Mis Materias</h3>
-        <ul id="my-subjects" style="list-style:none; padding:0; margin:0;">
-        </ul>
       </div>
     </div>
-  </div>
-</main>
 
-<!-- Scripts -->
-<script src="./js/scripts.js"></script>
-<script>
-  lucide.createIcons();
+  </main>
 
-  // Función para cerrar sesión
-  function cerrarSesion() {
-    fetch(' /logout', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(response =>
-      response.json())
-      .then(data => {
-        if (data.success) {
-          window.location.href = '/signup';
+  <!-- Scripts -->
+  <script src="./js/scripts.js"></script>
+
+  <script>
+    lucide.createIcons();
+
+    function cerrarSesion() {
+      fetch(' /logout', { method: 'POST' }).then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/signup';
+          }
+        })
+        .catch(err => console.error(err));
+    }
+
+    const tasksTodayContainer = document.getElementById('tasks-today');
+    const upcomingTasksList = document.getElementById('upcoming-tasks');
+    const mySubjectsList = document.getElementById('my-subjects');
+
+    async function cargarTareasHoy() {
+      try {
+        const res = await fetch('/api/tareas/hoy');
+        const data = await res.json();
+
+        tasksTodayContainer.innerHTML = '';
+
+        if (data.success && data.tareas.length) {
+          data.tareas.forEach(task => {
+            const div = document.createElement('div');
+            div.className = 'task-card';
+            div.style.padding = '10px';
+            div.style.borderRadius = '12px';
+            div.style.background = 'white';
+            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+            div.style.cursor = 'pointer';
+            div.onclick = () => window.location.href = '/tareas';
+
+            const fecha = new Date(task.fecha_entrega).toLocaleDateString('es-MX', {
+              day: 'numeric',
+              month: 'short'
+            });
+
+            div.innerHTML = `
+              <strong>${task.titulo}</strong><br>
+              <span>${task.materia_nombre || 'Sin materia'}</span><br>
+              <small>${fecha}</small>
+              `;
+
+            tasksTodayContainer.appendChild(div);
+          });
+        } else {
+          tasksTodayContainer.innerHTML =
+            '<p style="text-align:center;color:#666;padding:20px;">No hay tareas para hoy</p>';
         }
-      })
-      .catch(error => {
-        console.error('Error al cerrar sesión:', error);
-      });
-  }
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-  // Simular tareas en el tablon
-  const tasksTodayContainer = document.getElementById('tasks-today');
-  const tasksToday = [
-    { title: "Examen Apis", subject: "Progra Web", date: "29/10/2025" },
-    { title: "Proyecto Movil", subject: "Progra Movil", date: "29/10/2025" },
-    { title: "Problema Cisco", subject: "Sistemas Distribuidos", date: "29/10/2025" }
-  ];
+    async function cargarProximasTareas() {
+      const res = await fetch('/api/tareas');
+      const data = await res.json();
 
-  tasksToday.forEach(task => {
-    const div = document.createElement('div');
-    div.classList.add('task-card');
-    div.style.padding = "10px";
-    div.style.borderRadius = "12px";
-    div.style.background = "white";
-    div.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-    div.innerHTML =
-      `<strong>${task.title}</strong><br><span>${task.subject}</span><br><small>${task.date}</small>`;
-    tasksTodayContainer.appendChild(div);
-  });
-</script>
+      upcomingTasksList.innerHTML = '';
+
+      const pendientes = data.tareas.filter(t => t.estado !== 'completada').slice(0, 5);
+
+      if (pendientes.length) {
+        pendientes.forEach(task => {
+          const li = document.createElement('li');
+          li.style.padding = '8px 0';
+          li.style.borderBottom = '1px solid #eee';
+          li.style.cursor = 'pointer';
+          li.onclick = () => window.location.href = '/tareas';
+
+          const fecha = new Date(task.fecha_entrega).toLocaleDateString('es-MX', {
+            day: 'numeric',
+            month: 'short'
+          });
+
+          li.innerHTML = `<strong>${task.titulo}</strong><br><small>${fecha}</small>`;
+          upcomingTasksList.appendChild(li);
+        });
+      } else {
+        upcomingTasksList.innerHTML = '<li style="color:#666;">No hay tareas pendientes</li>';
+      }
+    }
+
+    async function cargarMaterias() {
+      const res = await fetch('/api/materias');
+      const data = await res.json();
+
+      mySubjectsList.innerHTML = '';
+
+      const materias = data.materias.slice(0, 5);
+
+      if (materias.length) {
+        materias.forEach(m => {
+          const li = document.createElement('li');
+          li.style.padding = '8px 0';
+          li.style.borderBottom = '1px solid #eee';
+          li.style.cursor = 'pointer';
+          li.onclick = () => window.location.href = '/materias';
+
+          li.innerHTML = `<strong>${m.nombre}</strong><br><small>${m.nombre_profesor || 'Sin profesor'}</small>`;
+          mySubjectsList.appendChild(li);
+        });
+      } else {
+        mySubjectsList.innerHTML = '<li style="color:#666;">No hay materias inscritas</li>';
+      }
+    }
+
+    async function cargarEstadisticas() {
+      const [tRes, mRes] = await Promise.all([
+        fetch('/api/tareas'),
+        fetch('/api/materias')
+      ]);
+
+      const tareas = await tRes.json();
+      const materias = await mRes.json();
+
+      document.getElementById('tasks-progress').textContent =
+        tareas.tareas.filter(t => t.estado === 'completada').length;
+
+      document.getElementById('subjects-count').textContent =
+        materias.materias.length;
+    }
+
+    cargarTareasHoy();
+    cargarProximasTareas();
+    cargarMaterias();
+    cargarEstadisticas();
+  </script>
+
 </body>
 
 </html>

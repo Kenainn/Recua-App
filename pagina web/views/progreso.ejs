@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
 
   <!-- Navbar -->
@@ -31,14 +33,30 @@
 
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
-        <img src="img/kevin.jpg" alt="Usuario" class="user-img">
-        <p id="sidebar-username-main">Kenai Flores</p>
+        <img src="img/kevin.jpg" alt="<%= usuario.nombre %>" class="user-img">
+        <p id="sidebar-username-main">
+          <%= usuario.nombre %>
+        </p>
       </div>
       <div class="user-info-sidebar" id="userInfoSidebar">
-        <p id="sidebar-username">Kenai Flores</p>
-        <p id="sidebar-email">kevinyedwin388@gmail.com</p>
-        <p id="sidebar-role">Estudiante</p>
-        <button id="logout-btn">Cerrar Sesión</button>
+        <p id="sidebar-username">
+          <%= usuario.nombre %>
+        </p>
+        <p id="sidebar-email">
+          <%= usuario.correo %>
+        </p>
+        <p id="sidebar-role">
+          <%= usuario.tipo==='alumno' ? 'Estudiante' : 'Profesor' %>
+        </p>
+        <% if (usuario.tipo==='alumno' && usuario.matricula) { %>
+          <p id="sidebar-matricula">Matrícula: <%= usuario.matricula %>
+          </p>
+          <% } %>
+            <% if (usuario.tipo==='profesor' && usuario.numero_empleado) { %>
+              <p id="sidebar-empleado">No. Empleado: <%= usuario.numero_empleado %>
+              </p>
+              <% } %>
+                <button id="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
       </div>
     </div>
 
@@ -120,6 +138,44 @@
   <script src="./js/scripts.js"></script>
   <script>
     lucide.createIcons();
+
+    // Función para cerrar sesión
+    function cerrarSesion() {
+      fetch('/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = '/signup';
+          }
+        })
+        .catch(error => {
+          console.error('Error al cerrar sesión:', error);
+        });
+    }
+
+    // Cargar progreso del usuario
+    async function cargarProgreso() {
+      try {
+        const response = await fetch('/api/progreso');
+        const data = await response.json();
+
+        if (data.success) {
+          // Aquí puedes actualizar la interfaz con los datos del usuario
+          console.log('Progreso del usuario:', data);
+          // Por ahora mostramos los datos estáticos
+          // En el futuro se pueden actualizar dinámicamente
+        }
+      } catch (error) {
+        console.error('Error al cargar progreso:', error);
+      }
+    }
+
+    // Cargar progreso al iniciar
+    cargarProgreso();
   </script>
 </body>
+
 </html>
