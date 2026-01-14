@@ -35,7 +35,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     const numeroEmpleado = document.getElementById('numeroEmpleado').value;
 
     try {
-        const response = await fetch('http://localhost:3000/signup', {
+        const response = await fetch('/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 
         if (data.success) {
             alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
-            window.location.href = './login.html';
+            window.location.href = '/login';
         } else {
             alert('Error: ' + data.message);
         }

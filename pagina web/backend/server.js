@@ -62,6 +62,10 @@ function verificarAutenticacion(req, res, next) {
     if (req.session.usuario) {
         next();
     } else {
+        // Si es una petición API, devolver 401
+        if (req.path.startsWith('/api/')) {
+            return res.status(401).json({ success: false, message: "No autenticado" });
+        }
         res.redirect('/signup');
     }
 }
@@ -477,7 +481,12 @@ app.put('/api/tareas/:id/completar', verificarAutenticacion, (req, res) => {
                             res.json({
                                 success: true,
                                 message: "Tarea completada y progreso actualizado",
-                                progreso: { exp, nivel, racha_actual, mejor_racha }
+                                estadisticas: {
+                                    exp,
+                                    nivel,
+                                    racha: racha_actual,
+                                    mejorRacha: mejor_racha
+                                }
                             });
                         }
                     );

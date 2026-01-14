@@ -1,9 +1,6 @@
 const form = document.getElementById("loginForm");
 const mensaje = document.getElementById("mensaje");
 
-// URL base de tu servidor
-const SERVER_URL = "http://localhost:3000";
-
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -21,7 +18,7 @@ form.addEventListener("submit", async (e) => {
     }
 
     try {
-        const res = await fetch(`${SERVER_URL}/login`, {
+        const res = await fetch('/login', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -53,6 +50,6 @@ form.addEventListener("submit", async (e) => {
         // FALLO DE CONEXIÓN
         console.error("Error de conexión:", error);
         mensaje.style.color = "red";
-        mensaje.textContent = `Error al conectar con el servidor en ${SERVER_URL}. Asegúrate de que esté corriendo.`;
+        mensaje.textContent = `Error al conectar con el servidor. Asegúrate de que esté corriendo.`;
     }
 });
