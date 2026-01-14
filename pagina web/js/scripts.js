@@ -136,20 +136,44 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ==========================
      YAK / ESTADÍSTICAS / RACHAS
      ========================== */
-  let yakLevel = 1, yakExp = 40, currentStreak = 7, bestStreak = 10;
+  function actualizarYak(nivel) {
+    const yakImage = document.getElementById("yak-image");
+    if (!yakImage) return;
 
-  function updateStats() {
-    const expFill = document.getElementById("exp-fill");
-    const expText = document.getElementById("exp-text");
-    const yakLevelEl = document.getElementById("yak-level");
-    const currentStreakEl = document.getElementById("current-streak");
-    const bestStreakEl = document.getElementById("best-streak");
+    let src = "/recuaimg/fondo/YAK BASE.png";
+    if (nivel >= 11) src = "/recuaimg/fondo/YAK CINTURON.png";
+    else if (nivel >= 9) src = "/recuaimg/fondo/YAK ELEGANTE.jpg";
+    else if (nivel >= 7) src = "/recuaimg/fondo/YAK PIRATA.jpg";
+    else if (nivel >= 5) src = "/recuaimg/fondo/YAK CABALLERO.jpg";
+    else if (nivel >= 3) src = "/recuaimg/fondo/YAK GRANJERO.jpg";
 
-    if (expFill) expFill.style.width = Math.min(yakExp / (yakLevel * 200) * 100, 100) + "%";
-    if (expText) expText.textContent = `${yakExp} / ${yakLevel * 200} exp`;
-    if (yakLevelEl) yakLevelEl.textContent = yakLevel;
-    if (currentStreakEl) currentStreakEl.textContent = currentStreak;
-    if (bestStreakEl) bestStreakEl.textContent = bestStreak;
+    yakImage.src = src;
+  }
+
+  async function updateStats() {
+    try {
+      const res = await fetch('/api/progreso');
+      const data = await res.json();
+
+      if (data.success) {
+        const { exp, nivel, racha, mejorRacha } = data.estadisticas;
+
+        const expFill = document.getElementById("exp-fill");
+        const expText = document.getElementById("exp-text");
+        const currentStreakEl = document.getElementById("current-streak");
+        const bestStreakEl = document.getElementById("best-streak");
+
+        const expNecesaria = nivel * 200;
+        if (expFill) expFill.style.width = Math.min((exp / expNecesaria) * 100, 100) + "%";
+        if (expText) expText.textContent = `${exp} / ${expNecesaria} exp`;
+        if (currentStreakEl) currentStreakEl.textContent = racha;
+        if (bestStreakEl) bestStreakEl.textContent = mejorRacha;
+
+        actualizarYak(nivel);
+      }
+    } catch (err) {
+      console.error('Error al actualizar estadísticas:', err);
+    }
   }
   updateStats();
 
@@ -176,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
           div.style.borderRadius = "12px";
           div.style.background = "white";
           div.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+          div.style.cursor = "pointer";
 
           const fecha = new Date(tarea.fecha_entrega).toLocaleDateString('es-MX');
 
@@ -183,6 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <strong>${tarea.titulo}</strong><br>
             <span>${tarea.materia_nombre || 'Sin materia'}</span><br>
             <small>${fecha}</small>
+            <button class="btn-complete" onclick="completarTarea(${tarea.id})" style="margin-top:5px; padding:5px 10px; background:#4CAF50; color:white; border:none; borderRadius:5px; cursor:pointer;">Entregar</button>
           `;
           tasksTodayContainer.appendChild(div);
         });
@@ -194,8 +220,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Cargar estadísticas
-  async function cargarEstadisticas() {
+  // Función global para completar tarea
+  window.completarTarea = async (id) => {
+    if (!confirm('¿Estás seguro de entregar esta tarea?')) return;
+    try {
+      const res = await fetch(`/api/tareas/${id}/completar`, { method: 'PUT' });
+      const data = await res.json();
+      if (data.success) {
+        alert('¡Tarea entregada! Has ganado 50 XP.');
+        cargarTareasHoy();
+        updateStats();
+      } else {
+        alert('Error al entregar tarea');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+
+  // Cargar estadísticas de materias y tareas
+  async function cargarEstadisticasDashboard() {
     try {
       // Cargar materias activas
       const responseMaterias = await fetch('/api/materias');
@@ -213,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tasksProgressEl.textContent = dataTareas.tareas.length;
       }
     } catch (error) {
-      console.error('Error al cargar estadísticas:', error);
+      console.error('Error al cargar estadísticas dashboard:', error);
     }
   }
 
@@ -229,12 +273,17 @@ document.addEventListener("DOMContentLoaded", () => {
       upcomingTasks.innerHTML = '';
 
       if (data.success && data.tareas.length > 0) {
-        // Mostrar las próximas 3 tareas
-        data.tareas.slice(0, 3).forEach(tarea => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span style="color:#ff9800;">•</span> ${tarea.titulo} - ${tarea.materia_nombre || 'Sin materia'}`;
-          upcomingTasks.appendChild(li);
-        });
+        // Mostrar las próximas 3 tareas pendientes
+        const pendientes = data.tareas.filter(t => t.estado !== 'completada').slice(0, 3);
+        if (pendientes.length > 0) {
+          pendientes.forEach(tarea => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span style="color:#ff9800;">•</span> ${tarea.titulo} - ${tarea.materia_nombre || 'Sin materia'}`;
+            upcomingTasks.appendChild(li);
+          });
+        } else {
+          upcomingTasks.innerHTML = '<li>No hay tareas próximas</li>';
+        }
       } else {
         upcomingTasks.innerHTML = '<li>No hay tareas próximas</li>';
       }
@@ -276,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Inicializar funciones del dashboard
   cargarTareasHoy();
-  cargarEstadisticas();
+  cargarEstadisticasDashboard();
   cargarProximasTareas();
   cargarMisMaterias();
 
@@ -299,6 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
         data.tareas.forEach(t => {
           const div = document.createElement("div");
           div.classList.add("task-card");
+          if (t.estado === 'completada') div.style.opacity = "0.6";
 
           const fecha = new Date(t.fecha_entrega).toLocaleDateString('es-MX');
 
@@ -306,7 +356,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <h3>${t.titulo}</h3>
             <p>${t.materia_nombre || 'Sin materia'}</p>
             <p><i data-lucide="calendar"></i> ${fecha}</p>
-            <div class="task-status pending">Pendiente</div>
+            <div class="task-status ${t.estado}">${t.estado === 'completada' ? 'Completada' : 'Pendiente'}</div>
+            ${t.estado !== 'completada' ? `<button class="btn-complete" onclick="completarTarea(${t.id})" style="margin-top:5px; padding:5px 10px; background:#4CAF50; color:white; border:none; borderRadius:5px; cursor:pointer;">Entregar</button>` : ''}
           `;
           tasksContainer.appendChild(div);
         });

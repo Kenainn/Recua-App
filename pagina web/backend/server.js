@@ -54,6 +54,8 @@ app.set('views', __dirname + '/../views');
 
 // === ARCHIVOS PÚBLICOS ===
 app.use(express.static(__dirname + "/../"));
+app.use('/recuaimg', express.static(__dirname + "/../../recuaimg"));
+app.use('/img', express.static(__dirname + "/../../img"));
 
 // === MIDDLEWARE PARA VERIFICAR AUTENTICACIÓN ===
 function verificarAutenticacion(req, res, next) {
@@ -419,9 +421,10 @@ app.delete('/api/tareas/:id', verificarAutenticacion, (req, res) => {
     );
 });
 
-// Marcar tarea como completada
+// Marcar tarea como completada y actualizar progreso
 app.put('/api/tareas/:id/completar', verificarAutenticacion, (req, res) => {
     const { id } = req.params;
+    const usuarioId = req.session.usuario.id;
 
     db.query(
         'UPDATE tareas SET estado = "completada" WHERE id = ?',
@@ -431,7 +434,55 @@ app.put('/api/tareas/:id/completar', verificarAutenticacion, (req, res) => {
                 console.error("Error al completar tarea:", err);
                 return res.status(500).json({ success: false, message: "Error al completar tarea" });
             }
-            res.json({ success: true, message: "Tarea marcada como completada" });
+
+            // Lógica de XP y Rachas
+            db.query(
+                'SELECT exp, nivel, racha_actual, mejor_racha, ultima_tarea_fecha FROM usuarios WHERE id = ?',
+                [usuarioId],
+                (err2, results) => {
+                    if (err2 || results.length === 0) return res.json({ success: true, message: "Tarea completada (error al actualizar XP)" });
+
+                    let { exp, nivel, racha_actual, mejor_racha, ultima_tarea_fecha } = results[0];
+                    const hoy = new Date().toISOString().split('T')[0];
+
+                    // Sumar XP
+                    exp += 50;
+                    if (exp >= nivel * 200) {
+                        exp -= nivel * 200;
+                        nivel += 1;
+                    }
+
+                    // Actualizar Racha
+                    if (!ultima_tarea_fecha || ultima_tarea_fecha !== hoy) {
+                        const ayer = new Date();
+                        ayer.setDate(ayer.getDate() - 1);
+                        const ayerStr = ayer.toISOString().split('T')[0];
+
+                        if (ultima_tarea_fecha === ayerStr) {
+                            racha_actual += 1;
+                        } else {
+                            racha_actual = 1;
+                        }
+
+                        if (racha_actual > mejor_racha) {
+                            mejor_racha = racha_actual;
+                        }
+                    }
+
+                    db.query(
+                        'UPDATE usuarios SET exp = ?, nivel = ?, racha_actual = ?, mejor_racha = ?, ultima_tarea_fecha = ? WHERE id = ?',
+                        [exp, nivel, racha_actual, mejor_racha, hoy, usuarioId],
+                        (err3) => {
+                            if (err3) console.error("Error al actualizar progreso:", err3);
+                            res.json({
+                                success: true,
+                                message: "Tarea completada y progreso actualizado",
+                                progreso: { exp, nivel, racha_actual, mejor_racha }
+                            });
+                        }
+                    );
+                }
+            );
         }
     );
 });
@@ -528,19 +579,29 @@ app.get('/api/alumnos/buscar/:matricula', verificarAutenticacion, (req, res) => 
 app.get('/api/progreso', verificarAutenticacion, (req, res) => {
     const usuarioId = req.session.usuario.id;
 
-    // Por ahora retornamos datos básicos
-    // En el futuro se pueden agregar logros, estadísticas, etc.
-    res.json({
-        success: true,
-        usuario: req.session.usuario,
-        logros: [],
-        skins: [],
-        estadisticas: {
-            racha: 0,
-            tareasCompletadas: 0,
-            materiasInscritas: 0
+    db.query(
+        'SELECT exp, nivel, racha_actual, mejor_racha FROM usuarios WHERE id = ?',
+        [usuarioId],
+        (err, results) => {
+            if (err || results.length === 0) {
+                return res.status(500).json({ success: false, message: "Error al obtener progreso" });
+            }
+
+            const { exp, nivel, racha_actual, mejor_racha } = results[0];
+
+            res.json({
+                success: true,
+                usuario: req.session.usuario,
+                estadisticas: {
+                    exp,
+                    nivel,
+                    racha: racha_actual,
+                    mejorRacha: mejor_racha,
+                    tareasCompletadas: 0
+                }
+            });
         }
-    });
+    );
 });
 
 // ========================================

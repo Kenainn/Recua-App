@@ -27,7 +27,7 @@
 
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
-        <img src="../recuaimg/pfp prueba.jpg" alt="Usuario" class="user-img">
+        <img src="/img/pfp prueba.jpg" alt="Usuario" class="user-img">
         <p id="sidebar-username-main">
           <%= usuario.nombre %>
         </p>
@@ -64,7 +64,7 @@
 
         <div class="card yak-card">
           <div class="yak-bg">
-            <img src="../recuaimg/fondo/YAK BASE.png" alt="Yak">
+            <img src="/recuaimg/fondo/YAK BASE.png" alt="Yak" id="yak-image">
           </div>
           <div class="yak-exp-bar">
             <div class="exp-fill" id="exp-fill"></div>
@@ -164,7 +164,6 @@
             div.style.background = 'white';
             div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
             div.style.cursor = 'pointer';
-            div.onclick = () => window.location.href = '/tareas';
 
             const fecha = new Date(task.fecha_entrega).toLocaleDateString('es-MX', {
               day: 'numeric',
@@ -175,6 +174,8 @@
               <strong>${task.titulo}</strong><br>
               <span>${task.materia_nombre || 'Sin materia'}</span><br>
               <small>${fecha}</small>
+              <button class="btn-complete" onclick="completarTarea(${task.id})"
+                style="margin-top:5px; padding:5px 10px; background:#4CAF50; color:white; border:none; borderRadius:5px; cursor:pointer;">Entregar</button>
               `;
 
             tasksTodayContainer.appendChild(div);
