@@ -1,4 +1,4 @@
-require('dotenv').config({ path: './.env' });
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -15,11 +15,16 @@ console.log('BD_PASSWORD:', process.env.BD_PASSWORD);
 
 // === CONFIG MYSQL ===
 const db = mysql.createConnection({
-    host: process.env.BD_HOST,
-    user: process.env.BD_USER,
-    password: process.env.BD_PASSWORD,
-    database: process.env.BD_NAME
+    host: process.env.BD_HOST || 'localhost',
+    user: process.env.BD_USER || 'root',
+    password: process.env.BD_PASSWORD || 'kenai123',
+    database: process.env.BD_NAME || 'recua',
+    port: process.env.BD_PORT || 3306,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
+
 
 db.connect((err) => {
     if (err) {
@@ -31,7 +36,7 @@ db.connect((err) => {
 
 // === MIDDLEWARES ===
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: true,
     credentials: true
 }));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -62,10 +67,6 @@ function verificarAutenticacion(req, res, next) {
     if (req.session.usuario) {
         next();
     } else {
-        // Si es una petición API, devolver 401
-        if (req.path.startsWith('/api/')) {
-            return res.status(401).json({ success: false, message: "No autenticado" });
-        }
         res.redirect('/signup');
     }
 }
@@ -208,6 +209,56 @@ app.get("/verificar-sesion", (req, res) => {
     }
 });
 
+// === PERFIL ===
+app.get('/perfil', verificarAutenticacion, (req, res) => {
+    if (req.session.usuario.tipo === 'alumno') {
+        db.query(
+            'SELECT matricula, grupo FROM alumnos WHERE usuario_id = ?',
+            [req.session.usuario.id],
+            (err, results) => {
+                if (err) {
+                    console.error('Error al obtener datos del alumno:', err);
+                    return res.render('perfil', { usuario: req.session.usuario });
+                }
+                const usuarioCompleto = { ...req.session.usuario, ...results[0] };
+                res.render('perfil', { usuario: usuarioCompleto });
+            }
+        );
+    } else {
+        res.render('perfil', { usuario: req.session.usuario });
+    }
+});
+
+app.put('/api/usuario', verificarAutenticacion, (req, res) => {
+    const { id } = req.session.usuario;
+    const { nombre, correo, password } = req.body;
+
+    if (!nombre || !correo) {
+        return res.status(400).json({ success: false, message: "Nombre y correo son obligatorios" });
+    }
+
+    let query = 'UPDATE usuarios SET nombre = ?, correo = ? WHERE id = ?';
+    let params = [nombre, correo, id];
+
+    if (password && password.trim() !== '') {
+        query = 'UPDATE usuarios SET nombre = ?, correo = ?, password = ? WHERE id = ?';
+        params = [nombre, correo, password, id];
+    }
+
+    db.query(query, params, (err, result) => {
+        if (err) {
+            console.error("Error al actualizar perfil:", err);
+            return res.status(500).json({ success: false, message: "Error al actualizar perfil" });
+        }
+
+        // Actualizar sesión
+        req.session.usuario.nombre = nombre;
+        req.session.usuario.correo = correo;
+
+        res.json({ success: true, message: "Perfil actualizado exitosamente" });
+    });
+});
+
 // ========================================
 // API ENDPOINTS - MATERIAS
 // ========================================
@@ -282,15 +333,17 @@ app.post('/api/materias', verificarAutenticacion, (req, res) => {
 // Actualizar materia
 app.put('/api/materias/:id', verificarAutenticacion, (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, horario } = req.body;
+    const { nombre, descripcion, horario, profesor } = req.body;
 
     if (!nombre || !horario) {
         return res.status(400).json({ success: false, message: "Nombre y horario son obligatorios" });
     }
 
+    // Nota: Estamos actualizando el campo de texto 'profesor' recién agregado.
+    // Si se quisiera mantener la relación con ID, se requeriría lógica adicional para buscar el ID.
     db.query(
-        'UPDATE materias SET nombre = ?, descripcion = ?, horario = ? WHERE id = ?',
-        [nombre, descripcion, horario, id],
+        'UPDATE materias SET nombre = ?, descripcion = ?, horario = ?, profesor = ? WHERE id = ?',
+        [nombre, descripcion, horario, profesor, id],
         (err, result) => {
             if (err) {
                 console.error("Error al actualizar materia:", err);
@@ -305,15 +358,29 @@ app.put('/api/materias/:id', verificarAutenticacion, (req, res) => {
 app.delete('/api/materias/:id', verificarAutenticacion, (req, res) => {
     const { id } = req.params;
 
+    // Primero eliminamos las tareas asociadas a esta materia
     db.query(
-        'DELETE FROM materias WHERE id = ?',
+        'DELETE FROM tareas WHERE materia_id = ?',
         [id],
-        (err, result) => {
-            if (err) {
-                console.error("Error al eliminar materia:", err);
-                return res.status(500).json({ success: false, message: "Error al eliminar materia" });
+        (errTasks) => {
+            if (errTasks) {
+                console.error("Error al eliminar tareas asociadas:", errTasks);
+                // No retornamos error fatal, intentamos borrar la materia de todas formas o avisamos
+                // Pero lo ideal es limpiar antes. Si falla, probablemente la materia no se borre si hay FK.
             }
-            res.json({ success: true, message: "Materia eliminada exitosamente" });
+
+            // Ahora eliminamos la materia
+            db.query(
+                'DELETE FROM materias WHERE id = ?',
+                [id],
+                (err, result) => {
+                    if (err) {
+                        console.error("Error al eliminar materia:", err);
+                        return res.status(500).json({ success: false, message: "Error al eliminar materia (puede tener datos asociados)" });
+                    }
+                    res.json({ success: true, message: "Materia y sus tareas eliminadas exitosamente" });
+                }
+            );
         }
     );
 });
@@ -361,17 +428,23 @@ app.get('/api/tareas/hoy', verificarAutenticacion, (req, res) => {
     });
 });
 
-// Crear nueva tarea (solo profesores)
+// Crear nueva tarea (todos)
 app.post('/api/tareas', verificarAutenticacion, (req, res) => {
-    if (req.session.usuario.tipo !== 'profesor') {
-        return res.status(403).json({ success: false, message: "No autorizado" });
+    // Se eliminó la restricción de solo profesores
+
+    const { materia_id, titulo, descripcion, fecha_entrega, dificultad } = req.body;
+    let xp_reward = 50;
+
+    switch (dificultad) {
+        case 'facil': xp_reward = 50; break;
+        case 'medio': xp_reward = 100; break;
+        case 'dificil': xp_reward = 200; break;
+        default: xp_reward = 50;
     }
 
-    const { materia_id, titulo, descripcion, fecha_entrega } = req.body;
-
     db.query(
-        'INSERT INTO tareas (materia_id, titulo, descripcion, fecha_entrega) VALUES (?, ?, ?, ?)',
-        [materia_id, titulo, descripcion, fecha_entrega],
+        'INSERT INTO tareas (materia_id, titulo, descripcion, fecha_entrega, dificultad, xp_reward) VALUES (?, ?, ?, ?, ?, ?)',
+        [materia_id, titulo, descripcion, fecha_entrega, dificultad || 'facil', xp_reward],
         (err, result) => {
             if (err) {
                 console.error("Error al crear tarea:", err);
@@ -450,46 +523,55 @@ app.put('/api/tareas/:id/completar', verificarAutenticacion, (req, res) => {
                     const hoy = new Date().toISOString().split('T')[0];
 
                     // Sumar XP
-                    exp += 50;
-                    if (exp >= nivel * 200) {
-                        exp -= nivel * 200;
-                        nivel += 1;
-                    }
+                    const tareaXp = results[0].xp_reward || 0; // Se asume que se hizo un JOIN, pero la query actual no trae xp_reward de tareas
 
-                    // Actualizar Racha
-                    if (!ultima_tarea_fecha || ultima_tarea_fecha !== hoy) {
-                        const ayer = new Date();
-                        ayer.setDate(ayer.getDate() - 1);
-                        const ayerStr = ayer.toISOString().split('T')[0];
+                    // Solución: Hacer primero query de la tarea para saber su XP reward o traerlo desde el update/param de tarea?
+                    // Corrección: La query principal no tiene datos de tareas, solo de usuarios.
+                    // Necesitamos saber cuánta XP da esta tarea.
 
-                        if (ultima_tarea_fecha === ayerStr) {
-                            racha_actual += 1;
+                    db.query('SELECT xp_reward FROM tareas WHERE id = ?', [id], (errTask, resTask) => {
+                        if (errTask || resTask.length === 0) {
+                            // Default si falla
+                            exp += 50;
                         } else {
-                            racha_actual = 1;
+                            exp += resTask[0].xp_reward;
                         }
 
-                        if (racha_actual > mejor_racha) {
-                            mejor_racha = racha_actual;
+                        if (exp >= nivel * 200) {
+                            exp -= nivel * 200;
+                            nivel += 1;
                         }
-                    }
 
-                    db.query(
-                        'UPDATE usuarios SET exp = ?, nivel = ?, racha_actual = ?, mejor_racha = ?, ultima_tarea_fecha = ? WHERE id = ?',
-                        [exp, nivel, racha_actual, mejor_racha, hoy, usuarioId],
-                        (err3) => {
-                            if (err3) console.error("Error al actualizar progreso:", err3);
-                            res.json({
-                                success: true,
-                                message: "Tarea completada y progreso actualizado",
-                                estadisticas: {
-                                    exp,
-                                    nivel,
-                                    racha: racha_actual,
-                                    mejorRacha: mejor_racha
-                                }
-                            });
+                        // Actualizar Racha
+                        if (!ultima_tarea_fecha || ultima_tarea_fecha !== hoy) {
+                            const ayer = new Date();
+                            ayer.setDate(ayer.getDate() - 1);
+                            const ayerStr = ayer.toISOString().split('T')[0];
+
+                            if (ultima_tarea_fecha === ayerStr) {
+                                racha_actual += 1;
+                            } else {
+                                racha_actual = 1;
+                            }
+
+                            if (racha_actual > mejor_racha) {
+                                mejor_racha = racha_actual;
+                            }
                         }
-                    );
+
+                        db.query(
+                            'UPDATE usuarios SET exp = ?, nivel = ?, racha_actual = ?, mejor_racha = ?, ultima_tarea_fecha = ? WHERE id = ?',
+                            [exp, nivel, racha_actual, mejor_racha, hoy, usuarioId],
+                            (err3) => {
+                                if (err3) console.error("Error al actualizar progreso:", err3);
+                                res.json({
+                                    success: true,
+                                    message: "Tarea completada y progreso actualizado",
+                                    progreso: { exp, nivel, racha_actual, mejor_racha }
+                                });
+                            }
+                        );
+                    });
                 }
             );
         }

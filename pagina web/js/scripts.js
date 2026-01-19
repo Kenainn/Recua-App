@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Materias", icon: "book-open", page: "/materias" },
     { name: "Tareas", icon: "check-square", page: "/tareas" },
     { name: "Progreso", icon: "trending-up", page: "/progreso" },
+    { name: "Perfil", icon: "user", page: "/perfil" },
   ];
 
   const teacherOptions = [
@@ -481,131 +482,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ==========================
-     MATERIAS - Agregar nueva materia (Modal)
-     ========================== */
-  const btnAgregar = document.querySelector('.btn-green');
-  const modal = document.getElementById('modalMateria');
-  const form = document.getElementById('formMateria');
-  const cancelar = document.getElementById('cancelarMateria');
-  const grid = document.querySelector('.materias-grid');
-
-  if (btnAgregar && modal && form) {
-    // Mostrar modal
-    btnAgregar.addEventListener('click', () => {
-      modal.style.display = 'flex';
-    });
-
-    // Cerrar modal
-    if (cancelar) {
-      cancelar.addEventListener('click', () => {
-        modal.style.display = 'none';
-        form.reset();
-      });
-    }
-
-    // Cerrar si clic fuera del modal
-    window.addEventListener('click', e => {
-      if (e.target === modal) modal.style.display = 'none';
-    });
-
-    // Validaciones con expresiones regulares
-    const regexNombre = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]{3,50}$/;
-    const regexHorario = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s0-9:-]+$/;
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const nombre = document.getElementById('nombreMateria').value.trim();
-      const descripcion = document.getElementById('descripcionMateria')?.value.trim();
-      const horario = document.getElementById('horarioMateria')?.value.trim();
-
-      if (!regexNombre.test(nombre)) {
-        alert('El nombre solo puede contener letras (máx. 50 caracteres).');
-        return;
-      }
-
-      if (horario && !regexHorario.test(horario)) {
-        alert('El horario contiene caracteres inválidos.');
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/materias', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            nombre: nombre,
-            descripcion: descripcion,
-            horario: horario
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          alert('Materia creada exitosamente');
-          modal.style.display = 'none';
-          form.reset();
-          cargarMaterias(); // Recargar las materias
-        } else {
-          alert('Error: ' + data.message);
-        }
-      } catch (error) {
-        console.error('Error al crear materia:', error);
-        alert('Error al crear materia');
-      }
-    });
-  }
-
-  // Cargar materias en la página de materias
-  async function cargarMaterias() {
-    if (!grid) return;
-
-    try {
-      const response = await fetch('/api/materias');
-      const data = await response.json();
-
-      grid.innerHTML = '';
-
-      if (data.success && data.materias.length > 0) {
-        data.materias.forEach(materia => {
-          const div = document.createElement('div');
-          div.classList.add('materia-card');
-          div.innerHTML = `
-            <div class="materia-header">
-              <div class="materia-title">
-                <div class="materia-icon" style="background-color: var(--accent);">
-                  <i class="ri-book-2-line"></i>
-                </div>
-                <h3>${materia.nombre}</h3>
-              </div>
-              <div class="materia-actions">
-                <i class="ri-edit-line"></i>
-                <i class="ri-delete-bin-line"></i>
-              </div>
-            </div>
-            <div class="materia-profesor">
-              <i class="ri-user-3-line"></i> <span>${materia.nombre_profesor || 'Sin profesor asignado'}</span>
-            </div>
-            <div class="materia-footer">
-              <span class="materia-estado estado-activa">Activa</span>
-            </div>
-          `;
-          grid.appendChild(div);
-        });
-      } else {
-        grid.innerHTML = '<p style="text-align:center; color:#999;">No hay materias registradas</p>';
-      }
-    } catch (error) {
-      console.error('Error al cargar materias:', error);
-      grid.innerHTML = '<p style="text-align:center; color:red;">Error al cargar materias</p>';
-    }
-  }
-
-  cargarMaterias();
+  // Cargar materias solo si estamos en la página donde existe el grid y NO es la página de materias principal (que tiene su propio script)
+  // En este caso, ya que materias.ejs tiene su propio script completo, eliminamos la lógica duplicada de aquí
+  // para evitar conflictos.
 
   // Inicializar Lucide icons
   lucide.createIcons();

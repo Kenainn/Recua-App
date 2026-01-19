@@ -21,12 +21,7 @@
 
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
-    <ul>
-      <li onclick="location.href='index.html'"><i class="ri-home-5-line"></i> Home</li>
-      <li onclick="location.href='tareas.html'"><i class="ri-task-line"></i> Tareas</li>
-      <li onclick="location.href='materias.html'"><i class="ri-book-2-line"></i> Materias</li>
-      <li onclick="location.href='calificaciones.html'"><i class="ri-bar-chart-2-line"></i> Calificaciones</li>
-    </ul>
+    <ul></ul>
 
     <hr>
 
@@ -70,9 +65,7 @@
         <h1>Mis tareas</h1>
         <p>Revisa tus tareas pendientes y su fecha límite</p>
       </div>
-      <% if (usuario.tipo==='profesor' ) { %>
-        <button class="btn-green" id="agregarTarea">Agregar tarea</button>
-        <% } %>
+      <button class="btn-green" id="agregarTarea">Agregar tarea</button>
     </div>
 
     <div class="tareas-grid" id="tareasContainer">
@@ -91,7 +84,14 @@
       <input type="text" id="titulo" placeholder="Título de la tarea">
       <textarea id="descripcion" placeholder="Descripción" rows="3"
         style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-family: 'Poppins', sans-serif; resize: vertical;"></textarea>
-      <input type="date" id="fecha_entrega">
+      <input type="date" id="fecha_entrega" style="margin-bottom: 8px;">
+
+      <select id="dificultad"
+        style="padding: 0.6rem; border: 1px solid #ccc; border-radius: 8px; font-family: 'Poppins', sans-serif;">
+        <option value="facil">Fácil (50 XP)</option>
+        <option value="medio" selected>Medio (100 XP)</option>
+        <option value="dificil">Difícil (200 XP)</option>
+      </select>
       <div class="modal-buttons">
         <button class="btn btn-gray" id="cancelarBtn">Cancelar</button>
         <button class="btn btn-green" id="guardarBtn">Guardar</button>
@@ -229,6 +229,7 @@
     const tituloInput = document.getElementById('titulo');
     const descripcionInput = document.getElementById('descripcion');
     const fechaInput = document.getElementById('fecha_entrega');
+    const dificultadInput = document.getElementById('dificultad');
 
     let editId = null;
     const esProfesor = '<%= usuario.tipo %>' === 'profesor';
@@ -290,14 +291,23 @@
         const estadoTexto = estado === 'completada' ? 'Completada' : 'Pendiente';
 
         card.innerHTML = `
-          <div class="tarea-header">
-            <h3>${tarea.titulo}</h3>
-            <span class="estado ${estadoClass}">${estadoTexto}</span>
+          <div class="tarea-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+            <div style="display:flex; flex-direction: column; gap:4px;">
+                <h3 style="margin: 0; font-size: 1.1rem;">${tarea.titulo}</h3>
+                <span style="font-size:0.75rem; padding:2px 8px; border-radius:12px; background:#f0f0f0; color:#555; width: fit-content; border: 1px solid #ddd;">
+                  ${(tarea.dificultad || 'facil').toUpperCase()}
+                </span>
+            </div>
+            <span class="estado ${estadoClass}" style="font-size: 0.8rem; padding: 4px 8px; border-radius: 6px;">${estadoTexto}</span>
           </div>
-          <p>${tarea.descripcion || 'Sin descripción'}</p>
-          <p><strong>Materia:</strong> ${tarea.materia_nombre || 'Sin materia'}</p>
-          <p><strong>Fecha de entrega:</strong> ${fechaEntrega}</p>
-          <div class="tarea-footer" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+          
+          <div class="tarea-body" style="margin-bottom: 15px;">
+            <p style="margin-bottom: 5px; color: #555;">${tarea.descripcion || 'Sin descripción'}</p>
+            <p style="margin-bottom: 5px; font-size: 0.9rem;"><strong style="color: var(--secondary);">Materia:</strong> ${tarea.materia_nombre || 'Sin materia'}</p>
+            <p style="font-size: 0.9rem;"><strong style="color: var(--secondary);">Entrega:</strong> ${fechaEntrega}</p>
+          </div>
+
+          <div class="tarea-footer" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; border-top: 1px solid #eee; padding-top: 10px;">
             ${estado !== 'completada' ? `
               <button class="btn-entregar" onclick="marcarCompletada(${tarea.id})">
                 Marcar como completada
@@ -331,6 +341,7 @@
         tituloInput.value = '';
         descripcionInput.value = '';
         fechaInput.value = '';
+        if (dificultadInput) dificultadInput.value = 'medio';
         editId = null;
       });
     }
@@ -349,6 +360,7 @@
         const titulo = tituloInput.value.trim();
         const descripcion = descripcionInput.value.trim();
         const fecha_entrega = fechaInput.value;
+        const dificultad = dificultadInput.value;
 
         if (!materia_id || !titulo || !fecha_entrega) {
           alert('Por favor completa todos los campos obligatorios');
@@ -362,7 +374,7 @@
           const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ materia_id, titulo, descripcion, fecha_entrega })
+            body: JSON.stringify({ materia_id, titulo, descripcion, fecha_entrega, dificultad })
           });
 
           const data = await response.json();

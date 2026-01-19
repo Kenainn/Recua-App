@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Recua</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn-save:hover {
+            background: var(--primary);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+        <h1>Mi Perfil</h1>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <ul></ul>
+        <hr>
+
+        <div class="user-sidebar">
+            <div class="user-main" id="userMain">
+                <img src="/img/pfp prueba.jpg" alt="Usuario" class="user-img">
+                <p id="sidebar-username-main">
+                    <%= usuario.nombre %>
+                </p>
+            </div>
+            <div class="user-info-sidebar" id="userInfoSidebar">
+                <p id="sidebar-username">
+                    <%= usuario.nombre %>
+                </p>
+                <p id="sidebar-email">
+                    <%= usuario.correo %>
+                </p>
+                <p id="sidebar-role">
+                    <%= usuario.tipo==='alumno' ? 'Alumno' : 'Profesor' %>
+                </p>
+                <button id="logout-btn">Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+        <div class="profile-container">
+            <div class="profile-header">
+                <img src="/img/pfp prueba.jpg" alt="Avatar" class="profile-avatar">
+                <h2>Editar Información</h2>
+                <p style="color: #666;">Actualiza tus datos personales</p>
+            </div>
+
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo</label>
+                    <input type="text" id="nombre" name="nombre" value="<%= usuario.nombre %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" value="<%= usuario.correo %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Nueva Contraseña (dejar en blanco para no cambiar)</label>
+                    <input type="password" id="password" name="password" placeholder="******">
+                </div>
+
+                <% if (usuario.tipo==='alumno' ) { %>
+                    <div class="form-group">
+                        <label>Matrícula</label>
+                        <input type="text" value="<%= usuario.matricula || 'N/A' %>" disabled
+                            style="background: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label>Grupo</label>
+                        <input type="text" value="<%= usuario.grupo || 'N/A' %>" disabled
+                            style="background: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <% } %>
+
+                        <% if (usuario.tipo==='profesor' ) { %>
+                            <div class="form-group">
+                                <label>Número de Empleado</label>
+                                <input type="text" value="<%= usuario.numero_empleado || 'N/A' %>" disabled
+                                    style="background: #f5f5f5; cursor: not-allowed;">
+                            </div>
+                            <% } %>
+
+                                <button type="submit" class="btn-save">Guardar Cambios</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="./js/scripts.js"></script>
+    <script>
+        lucide.createIcons();
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/usuario', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nombre, correo: email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Perfil actualizado correctamente');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error al actualizar el perfil');
+            }
+        });
+
+        // Logout logic needs to be attached if script.js doesn't cover the specific sidebar button structure here? 
+        // scripts.js handles #logout-btn click so it should be fine.
+    </script>
+</body>
+
+</html>
