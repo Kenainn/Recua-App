@@ -15,11 +15,11 @@ console.log('BD_PASSWORD:', process.env.BD_PASSWORD);
 
 // === CONFIG MYSQL ===
 const db = mysql.createConnection({
-    host: process.env.BD_HOST || 'localhost',
+    host: process.env.BD_HOST || 'caboose.proxy.rlwy.net',
     user: process.env.BD_USER || 'root',
-    password: process.env.BD_PASSWORD || 'kenai123',
+    password: process.env.BD_PASSWORD || 'jAIsHdXhOLZXSeHsWfYNchQqcqqMPgYD',
     database: process.env.BD_NAME || 'recua',
-    port: process.env.BD_PORT || 3306,
+    port: process.env.BD_PORT || 24029,
     ssl: {
         rejectUnauthorized: false
     }
