@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="./css/style.css">
   <link rel="stylesheet" href="./css/logros.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+
 </head>
 
 <body>
@@ -33,7 +33,10 @@
 
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
-        <img src="img/kevin.jpg" alt="<%= usuario.nombre %>" class="user-img">
+
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">
+          <%= usuario.tipo==='profesor' ? '🎓' : '👤' %>
+        </div>
         <p id="sidebar-username-main">
           <%= usuario.nombre %>
         </p>
@@ -137,7 +140,7 @@
 
   <script src="./js/scripts.js"></script>
   <script>
-    lucide.createIcons();
+
 
     // Función para cerrar sesión
     function cerrarSesion() {

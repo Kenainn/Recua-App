@@ -145,11 +145,11 @@ app.get('/login', (req, res) => {
 
 // === LOGIN (POST) ===
 app.post("/login", (req, res) => {
-    const { email, password, rol } = req.body;
+    const { email, password } = req.body;
 
     db.query(
-        `SELECT * FROM usuarios WHERE correo = ? AND tipo = ?`,
-        [email, rol],
+        `SELECT * FROM usuarios WHERE correo = ?`,
+        [email],
         (err, results) => {
             if (err) {
                 console.error("Error en consulta de login:", err);
@@ -283,7 +283,7 @@ app.get('/api/materias', verificarAutenticacion, (req, res) => {
 
 // Crear nueva materia
 app.post('/api/materias', verificarAutenticacion, (req, res) => {
-    const { nombre, descripcion, profesor, horario } = req.body;
+    const { nombre, descripcion, horario } = req.body;
 
     if (!nombre) {
         return res.status(400).json({ success: false, message: "El nombre es obligatorio" });
@@ -333,17 +333,15 @@ app.post('/api/materias', verificarAutenticacion, (req, res) => {
 // Actualizar materia
 app.put('/api/materias/:id', verificarAutenticacion, (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, horario, profesor } = req.body;
+    const { nombre, descripcion, horario } = req.body;
 
     if (!nombre || !horario) {
         return res.status(400).json({ success: false, message: "Nombre y horario son obligatorios" });
     }
 
-    // Nota: Estamos actualizando el campo de texto 'profesor' recién agregado.
-    // Si se quisiera mantener la relación con ID, se requeriría lógica adicional para buscar el ID.
     db.query(
-        'UPDATE materias SET nombre = ?, descripcion = ?, horario = ?, profesor = ? WHERE id = ?',
-        [nombre, descripcion, horario, profesor, id],
+        'UPDATE materias SET nombre = ?, descripcion = ?, horario = ? WHERE id = ?',
+        [nombre, descripcion, horario, id],
         (err, result) => {
             if (err) {
                 console.error("Error al actualizar materia:", err);
@@ -457,9 +455,7 @@ app.post('/api/tareas', verificarAutenticacion, (req, res) => {
 
 // Actualizar tarea
 app.put('/api/tareas/:id', verificarAutenticacion, (req, res) => {
-    if (req.session.usuario.tipo !== 'profesor') {
-        return res.status(403).json({ success: false, message: "No autorizado" });
-    }
+
 
     const { id } = req.params;
     const { materia_id, titulo, descripcion, fecha_entrega } = req.body;
@@ -479,9 +475,7 @@ app.put('/api/tareas/:id', verificarAutenticacion, (req, res) => {
 
 // Eliminar tarea
 app.delete('/api/tareas/:id', verificarAutenticacion, (req, res) => {
-    if (req.session.usuario.tipo !== 'profesor') {
-        return res.status(403).json({ success: false, message: "No autorizado" });
-    }
+
 
     const { id } = req.params;
 

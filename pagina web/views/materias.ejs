@@ -7,7 +7,7 @@
   <title>Materias - Recua</title>
   <link rel="stylesheet" href="./css/style.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
     /* ----- ENCABEZADO ----- */
     .materias-header {
@@ -226,7 +226,10 @@
 
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
-        <img src="../recuaimg/pfp prueba.jpg" alt="Usuario" class="user-img">
+
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">
+          <%= usuario.tipo==='profesor' ? '🎓' : '👤' %>
+        </div>
         <p id="sidebar-username-main">
           <%= usuario.nombre %>
         </p>
@@ -268,7 +271,6 @@
       <h2 id="modal-title">Nueva Materia</h2>
       <input type="text" id="nombre" placeholder="Nombre de la materia">
       <input type="text" id="descripcion" placeholder="Descripción">
-      <input type="text" id="profesor" placeholder="Profesor">
 
       <label style="font-size: 0.9rem; font-weight: 600; margin-top: 5px;">Horario:</label>
       <div class="days-selector" id="daysSelector">
@@ -294,8 +296,6 @@
   </div>
 
   <script>
-    lucide.createIcons();
-
     // Función para cerrar sesión
     function cerrarSesion() {
       fetch('/logout', {
@@ -321,7 +321,6 @@
     const modalTitle = document.getElementById("modal-title");
     const nombreInput = document.getElementById("nombre");
     const descripcionInput = document.getElementById("descripcion");
-    const profesorInput = document.getElementById("profesor");
 
     // Elementos del nuevo selector de horario
     const daysSelector = document.getElementById("daysSelector");
@@ -396,7 +395,6 @@
       modalTitle.textContent = "Nueva Materia";
       nombreInput.value = "";
       descripcionInput.value = "";
-      profesorInput.value = "";
       setHorarioFields("");
       editId = null;
     });
@@ -406,7 +404,6 @@
     btnGuardar.addEventListener("click", async () => {
       const nombre = nombreInput.value.trim();
       const descripcion = descripcionInput.value.trim();
-      const profesor = profesorInput.value.trim();
       const horario = getHorarioString();
 
       if (!nombre) {
@@ -425,7 +422,7 @@
         const response = await fetch(url, {
           method: method,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre, descripcion, profesor, horario })
+          body: JSON.stringify({ nombre, descripcion, horario })
         });
 
         const data = await response.json();
@@ -460,7 +457,6 @@
             </div>
           </div>
           <p>${m.descripcion || 'Sin descripción'}</p>
-          <p><i data-lucide="user"></i> ${m.nombre_profesor || 'Sin asignar'}</p>
           <p><i data-lucide="clock"></i> ${m.horario || 'Sin horario'}</p>
           <div class="materia-footer">
             <span class="estado-activa" style="padding: 4px 8px; background: var(--accent); border-radius: 8px;">Activa</span>
@@ -469,8 +465,6 @@
         `;
         materiasContainer.appendChild(card);
       });
-      // Re-renderizar iconos de Lucide
-      lucide.createIcons();
     }
 
     window.editarMateria = async function (id) {
@@ -481,7 +475,6 @@
       modalTitle.textContent = "Editar Materia";
       nombreInput.value = m.nombre;
       descripcionInput.value = m.descripcion || '';
-      profesorInput.value = m.nombre_profesor || '';
       setHorarioFields(m.horario || "");
       editId = id;
     };

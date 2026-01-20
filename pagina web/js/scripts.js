@@ -27,15 +27,15 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(err => console.error('Error al verificar sesión:', err));
 
   const commonOptions = [
-    { name: "Home", icon: "home", page: "/index" },
-    { name: "Materias", icon: "book-open", page: "/materias" },
-    { name: "Tareas", icon: "check-square", page: "/tareas" },
-    { name: "Progreso", icon: "trending-up", page: "/progreso" },
-    { name: "Perfil", icon: "user", page: "/perfil" },
+    { name: "Home", emoji: "🏠", page: "/index" },
+    { name: "Materias", emoji: "📚", page: "/materias" },
+    { name: "Tareas", emoji: "📝", page: "/tareas" },
+    { name: "Progreso", emoji: "📈", page: "/progreso" },
+    { name: "Perfil", emoji: "👤", page: "/perfil" },
   ];
 
   const teacherOptions = [
-    { name: "Evaluaciones", icon: "file-check", page: "/evaluaciones" },
+    { name: "Evaluaciones", emoji: "📊", page: "/evaluaciones" },
   ];
 
   function actualizarMenu() {
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Agregar opciones del menú
     menuOptions.forEach(opt => {
       const li = document.createElement("li");
-      li.innerHTML = `<i data-lucide="${opt.icon}"></i> ${opt.name}`;
+      li.innerHTML = `<span style="margin-right:8px;">${opt.emoji}</span> ${opt.name}`;
       li.addEventListener("click", () => {
         window.location.href = opt.page;
       });
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     menuList.appendChild(separador);
 
     const logoutLi = document.createElement("li");
-    logoutLi.innerHTML = `<i data-lucide="log-out"></i> Cerrar Sesión`;
+    logoutLi.innerHTML = `<span style="margin-right:8px;">🚪</span> Cerrar Sesión`;
     logoutLi.style.color = "#f44336";
     logoutLi.style.cursor = "pointer";
     logoutLi.addEventListener("click", cerrarSesion);

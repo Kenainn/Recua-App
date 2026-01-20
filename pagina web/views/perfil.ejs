@@ -7,7 +7,7 @@
     <title>Mi Perfil - Recua</title>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
         .profile-container {
             max-width: 600px;
@@ -90,7 +90,10 @@
 
         <div class="user-sidebar">
             <div class="user-main" id="userMain">
-                <img src="/img/pfp prueba.jpg" alt="Usuario" class="user-img">
+
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">
+                    <%= usuario.tipo==='profesor' ? '🎓' : '👤' %>
+                </div>
                 <p id="sidebar-username-main">
                     <%= usuario.nombre %>
                 </p>
@@ -116,7 +119,10 @@
     <main class="main">
         <div class="profile-container">
             <div class="profile-header">
-                <img src="/img/pfp prueba.jpg" alt="Avatar" class="profile-avatar">
+                <div
+                    style="font-size: 4rem; color: var(--secondary); margin-bottom: 15px; display: flex; justify-content: center;">
+                    <i data-lucide="<%= usuario.tipo === 'profesor' ? 'graduation-cap' : 'user' %>"></i>
+                </div>
                 <h2>Editar Información</h2>
                 <p style="color: #666;">Actualiza tus datos personales</p>
             </div>
@@ -165,8 +171,6 @@
 
     <script src="./js/scripts.js"></script>
     <script>
-        lucide.createIcons();
-
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 

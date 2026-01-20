@@ -9,10 +9,9 @@ form.addEventListener("submit", async (e) => {
 
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
-    const rol = document.getElementById("rol").value;
 
     // Validación básica
-    if (!email || !password || !rol) {
+    if (!email || !password) {
         mensaje.textContent = "Por favor, completa todos los campos.";
         return;
     }
@@ -24,7 +23,7 @@ form.addEventListener("submit", async (e) => {
                 "Content-Type": "application/json"
             },
             credentials: 'include', // IMPORTANTE: Incluir cookies de sesión
-            body: JSON.stringify({ email, password, rol })
+            body: JSON.stringify({ email, password })
         });
 
         // Asegurarse de que la respuesta sea JSON, incluso si hay error 401/500

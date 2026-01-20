@@ -1,15 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profesores</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
+
 <body>
   <div class="user-sidebar">
     <div class="user-main">
-      <img src="./img/user.png" alt="Usuario" class="user-img">
+
+      <div style="font-size: 2.5rem; color: var(--secondary); margin-bottom: 10px;">
+        <!-- Nota: Este archivo parece usar JS para llenar datos, asumimos que 'usuario' no está disponible server-side o se llena dinamicamente. 
+               Si es estático, hardcodeamos user o lo llenamos con JS. 
+               Dado que es profesores.ejs, probablemente sea Profesor. Usamos icono neutro o esperamos JS. -->
+        <i data-lucide="graduation-cap"></i>
+      </div>
       <p id="sidebar-username-main">Cargando...</p>
     </div>
     <div class="user-info-sidebar">
@@ -27,6 +35,8 @@
     <p>Aquí los profesores podrán administrar grupos, tareas y evaluaciones.</p>
   </div>
 
-  <script src="js/sidebar.js"></script>
+  <script>
+  </script>
 </body>
+
 </html>

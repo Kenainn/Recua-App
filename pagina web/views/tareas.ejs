@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="./css/style.css">
   <link rel="stylesheet" href="./css/tareas.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+
 </head>
 
 <body>
@@ -28,7 +28,10 @@
     <!-- Perfil dentro del sidebar -->
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
-        <img src="img/kevin.jpg" alt="<%= usuario.nombre %>" class="user-img">
+
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">
+          <%= usuario.tipo==='profesor' ? '🎓' : '👤' %>
+        </div>
         <p id="sidebar-username-main">
           <%= usuario.nombre %>
         </p>
@@ -200,8 +203,6 @@
 
   <script src="./js/scripts.js"></script>
   <script>
-    lucide.createIcons();
-
     // Función para cerrar sesión
     function cerrarSesion() {
       fetch('/logout', {
@@ -317,14 +318,12 @@
                 Deshacer completada
               </button>
             `}
-            ${esProfesor ? `
               <button class="btn btn-gray" onclick="editarTarea(${tarea.id})" style="padding: 0.5rem 1rem;">
                 Editar
               </button>
               <button class="btn btn-red" onclick="eliminarTarea(${tarea.id})" style="padding: 0.5rem 1rem;">
                 Eliminar
               </button>
-            ` : ''}
           </div>
         `;
 
