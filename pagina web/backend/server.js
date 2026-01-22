@@ -18,7 +18,7 @@ const db = mysql.createConnection({
     host: process.env.BD_HOST || 'caboose.proxy.rlwy.net',
     user: process.env.BD_USER || 'root',
     password: process.env.BD_PASSWORD || 'jAIsHdXhOLZXSeHsWfYNchQqcqqMPgYD',
-    database: process.env.BD_NAME || 'recua',
+    database: process.env.BD_NAME || 'railway',
     port: process.env.BD_PORT || 24029,
     ssl: {
         rejectUnauthorized: false
