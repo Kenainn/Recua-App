@@ -7,8 +7,7 @@
   <title>Recua Dashboard</title>
   <link rel="stylesheet" href="./css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -29,7 +28,7 @@
     <div class="user-sidebar">
       <div class="user-main" id="userMain">
         <div style="font-size: 2.5rem; margin-bottom: 10px;">
-          <%= usuario.tipo==='profesor' ? '🎓' : '👤' %>
+          <%= usuario.tipo==='profesor' ? '🎓' : (usuario.tipo==='admin' ? '🛡️' : '👤' ) %>
         </div>
         <p id="sidebar-username-main">
           <%= usuario.nombre %>
@@ -44,9 +43,9 @@
           <%= usuario.correo %>
         </p>
         <p id="sidebar-role">
-          <%= usuario.tipo==='alumno' ? 'Alumno' : 'Profesor' %>
+          <%= usuario.tipo.toUpperCase() %>
         </p>
-        <button id="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <button id="logout-btn">Cerrar Sesión</button>
       </div>
     </div>
 
@@ -135,134 +134,7 @@
   <script src="./js/scripts.js"></script>
 
   <script>
-    function cerrarSesion() {
-      fetch(' /logout', { method: 'POST' }).then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            window.location.href = '/signup';
-          }
-        })
-        .catch(err => console.error(err));
-    }
-
-    const tasksTodayContainer = document.getElementById('tasks-today');
-    const upcomingTasksList = document.getElementById('upcoming-tasks');
-    const mySubjectsList = document.getElementById('my-subjects');
-
-    async function cargarTareasHoy() {
-      try {
-        const res = await fetch('/api/tareas/hoy');
-        const data = await res.json();
-
-        tasksTodayContainer.innerHTML = '';
-
-        if (data.success && data.tareas.length) {
-          data.tareas.forEach(task => {
-            const div = document.createElement('div');
-            div.className = 'task-card';
-            div.style.padding = '10px';
-            div.style.borderRadius = '12px';
-            div.style.background = 'white';
-            div.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-            div.style.cursor = 'pointer';
-
-            const fecha = new Date(task.fecha_entrega).toLocaleDateString('es-MX', {
-              day: 'numeric',
-              month: 'short'
-            });
-
-            div.innerHTML = `
-              <strong>${task.titulo}</strong><br>
-              <span>${task.materia_nombre || 'Sin materia'}</span><br>
-              <small>${fecha}</small>
-              <button class="btn-complete" onclick="completarTarea(${task.id})"
-                style="margin-top:5px; padding:5px 10px; background:#4CAF50; color:white; border:none; borderRadius:5px; cursor:pointer;">Entregar</button>
-              `;
-
-            tasksTodayContainer.appendChild(div);
-          });
-        } else {
-          tasksTodayContainer.innerHTML =
-            '<p style="text-align:center;color:#666;padding:20px;">No hay tareas para hoy</p>';
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    async function cargarProximasTareas() {
-      const res = await fetch('/api/tareas');
-      const data = await res.json();
-
-      upcomingTasksList.innerHTML = '';
-
-      const pendientes = data.tareas.filter(t => t.estado !== 'completada').slice(0, 5);
-
-      if (pendientes.length) {
-        pendientes.forEach(task => {
-          const li = document.createElement('li');
-          li.style.padding = '8px 0';
-          li.style.borderBottom = '1px solid #eee';
-          li.style.cursor = 'pointer';
-          li.onclick = () => window.location.href = '/tareas';
-
-          const fecha = new Date(task.fecha_entrega).toLocaleDateString('es-MX', {
-            day: 'numeric',
-            month: 'short'
-          });
-
-          li.innerHTML = `<strong>${task.titulo}</strong><br><small>${fecha}</small>`;
-          upcomingTasksList.appendChild(li);
-        });
-      } else {
-        upcomingTasksList.innerHTML = '<li style="color:#666;">No hay tareas pendientes</li>';
-      }
-    }
-
-    async function cargarMaterias() {
-      const res = await fetch('/api/materias');
-      const data = await res.json();
-
-      mySubjectsList.innerHTML = '';
-
-      const materias = data.materias.slice(0, 5);
-
-      if (materias.length) {
-        materias.forEach(m => {
-          const li = document.createElement('li');
-          li.style.padding = '8px 0';
-          li.style.borderBottom = '1px solid #eee';
-          li.style.cursor = 'pointer';
-          li.onclick = () => window.location.href = '/materias';
-
-          li.innerHTML = `<strong>${m.nombre}</strong><br><small>${m.nombre_profesor || 'Sin profesor'}</small>`;
-          mySubjectsList.appendChild(li);
-        });
-      } else {
-        mySubjectsList.innerHTML = '<li style="color:#666;">No hay materias inscritas</li>';
-      }
-    }
-
-    async function cargarEstadisticas() {
-      const [tRes, mRes] = await Promise.all([
-        fetch('/api/tareas'),
-        fetch('/api/materias')
-      ]);
-
-      const tareas = await tRes.json();
-      const materias = await mRes.json();
-
-      document.getElementById('tasks-progress').textContent =
-        tareas.tareas.filter(t => t.estado === 'completada').length;
-
-      document.getElementById('subjects-count').textContent =
-        materias.materias.length;
-    }
-
-    cargarTareasHoy();
-    cargarProximasTareas();
-    cargarMaterias();
-    cargarEstadisticas();
+    // El dashboard se inicializa automáticamente desde js/scripts.js
   </script>
 
 </body>

@@ -170,7 +170,7 @@ app.post("/login", (req, res) => {
                 id: user.id,
                 nombre: user.nombre,
                 correo: user.correo,
-                tipo: user.tipo,
+                tipo: user.correo === 'admin@recua.com' ? 'admin' : user.tipo,
                 numero_empleado: user.numero_empleado
             };
 
@@ -263,16 +263,27 @@ app.put('/api/usuario', verificarAutenticacion, (req, res) => {
 // API ENDPOINTS - MATERIAS
 // ========================================
 
-// Obtener todas las materias
+// Obtener materias del usuario
 app.get('/api/materias', verificarAutenticacion, (req, res) => {
+    const usuarioId = req.session.usuario.id;
     const query = `
-        SELECT m.*, p.usuario_id, u.nombre as nombre_profesor
+        SELECT m.*, p.usuario_id as prof_user_id, u.nombre as nombre_profesor
         FROM materias m
         LEFT JOIN profesores p ON m.profesor_id = p.id
         LEFT JOIN usuarios u ON p.usuario_id = u.id
+        WHERE m.usuario_id = ? OR (req.session.usuario.tipo = 'profesor' AND p.usuario_id = ?)
     `;
 
-    db.query(query, (err, results) => {
+    // Simplificado para que los alumnos vean lo que crearon y profesores lo suyo
+    const queryUser = `
+        SELECT m.*, u.nombre as nombre_profesor
+        FROM materias m
+        LEFT JOIN profesores p ON m.profesor_id = p.id
+        LEFT JOIN usuarios u ON p.usuario_id = u.id
+        WHERE m.usuario_id = ?
+    `;
+
+    db.query(queryUser, [usuarioId], (err, results) => {
         if (err) {
             console.error("Error al obtener materias:", err);
             return res.status(500).json({ success: false, message: "Error al obtener materias" });
@@ -302,8 +313,8 @@ app.post('/api/materias', verificarAutenticacion, (req, res) => {
                 const profesorId = results[0].id;
 
                 db.query(
-                    'INSERT INTO materias (nombre, profesor_id, descripcion, horario) VALUES (?, ?, ?, ?)',
-                    [nombre, profesorId, descripcion, horario],
+                    'INSERT INTO materias (nombre, profesor_id, descripcion, horario, usuario_id) VALUES (?, ?, ?, ?, ?)',
+                    [nombre, profesorId, descripcion, horario, req.session.usuario.id],
                     (err, result) => {
                         if (err) {
                             console.error("Error al crear materia:", err);
@@ -315,10 +326,10 @@ app.post('/api/materias', verificarAutenticacion, (req, res) => {
             }
         );
     } else {
-        // Para alumnos, crear materia sin profesor asignado
+        // Para alumnos, crear materia vinculada a su id
         db.query(
-            'INSERT INTO materias (nombre, descripcion, horario) VALUES (?, ?, ?)',
-            [nombre, descripcion, horario],
+            'INSERT INTO materias (nombre, descripcion, horario, usuario_id) VALUES (?, ?, ?, ?)',
+            [nombre, descripcion, horario, req.session.usuario.id],
             (err, result) => {
                 if (err) {
                     console.error("Error al crear materia:", err);
@@ -387,16 +398,18 @@ app.delete('/api/materias/:id', verificarAutenticacion, (req, res) => {
 // API ENDPOINTS - TAREAS
 // ========================================
 
-// Obtener todas las tareas
+// Obtener todas las tareas del usuario
 app.get('/api/tareas', verificarAutenticacion, (req, res) => {
+    const usuarioId = req.session.usuario.id;
     const query = `
         SELECT t.*, m.nombre as materia_nombre
         FROM tareas t
         LEFT JOIN materias m ON t.materia_id = m.id
+        WHERE t.usuario_id = ?
         ORDER BY t.fecha_entrega ASC
     `;
 
-    db.query(query, (err, results) => {
+    db.query(query, [usuarioId], (err, results) => {
         if (err) {
             console.error("Error al obtener tareas:", err);
             return res.status(500).json({ success: false, message: "Error al obtener tareas" });
@@ -405,19 +418,19 @@ app.get('/api/tareas', verificarAutenticacion, (req, res) => {
     });
 });
 
-// Obtener tareas de hoy
+// Obtener tareas de hoy del usuario
 app.get('/api/tareas/hoy', verificarAutenticacion, (req, res) => {
-    const hoy = new Date().toISOString().split('T')[0];
+    const usuarioId = req.session.usuario.id;
 
     const query = `
         SELECT t.*, m.nombre as materia_nombre
         FROM tareas t
         LEFT JOIN materias m ON t.materia_id = m.id
-        WHERE DATE(t.fecha_entrega) = ?
+        WHERE DATE(t.fecha_entrega) = CURDATE() AND t.usuario_id = ?
         ORDER BY t.fecha_entrega ASC
     `;
 
-    db.query(query, [hoy], (err, results) => {
+    db.query(query, [usuarioId], (err, results) => {
         if (err) {
             console.error("Error al obtener tareas de hoy:", err);
             return res.status(500).json({ success: false, message: "Error al obtener tareas" });
@@ -441,8 +454,8 @@ app.post('/api/tareas', verificarAutenticacion, (req, res) => {
     }
 
     db.query(
-        'INSERT INTO tareas (materia_id, titulo, descripcion, fecha_entrega, dificultad, xp_reward) VALUES (?, ?, ?, ?, ?, ?)',
-        [materia_id, titulo, descripcion, fecha_entrega, dificultad || 'facil', xp_reward],
+        'INSERT INTO tareas (materia_id, titulo, descripcion, fecha_entrega, dificultad, xp_reward, usuario_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [materia_id, titulo, descripcion, fecha_entrega, dificultad || 'facil', xp_reward, req.session.usuario.id],
         (err, result) => {
             if (err) {
                 console.error("Error al crear tarea:", err);
@@ -517,19 +530,12 @@ app.put('/api/tareas/:id/completar', verificarAutenticacion, (req, res) => {
                     const hoy = new Date().toISOString().split('T')[0];
 
                     // Sumar XP
-                    const tareaXp = results[0].xp_reward || 0; // Se asume que se hizo un JOIN, pero la query actual no trae xp_reward de tareas
-
-                    // Solución: Hacer primero query de la tarea para saber su XP reward o traerlo desde el update/param de tarea?
-                    // Corrección: La query principal no tiene datos de tareas, solo de usuarios.
                     // Necesitamos saber cuánta XP da esta tarea.
-
                     db.query('SELECT xp_reward FROM tareas WHERE id = ?', [id], (errTask, resTask) => {
-                        if (errTask || resTask.length === 0) {
-                            // Default si falla
-                            exp += 50;
-                        } else {
-                            exp += resTask[0].xp_reward;
-                        }
+                        let puntos = 50;
+                        if (!errTask && resTask.length > 0) puntos = resTask[0].xp_reward;
+
+                        exp += puntos;
 
                         if (exp >= nivel * 200) {
                             exp -= nivel * 200;
@@ -657,6 +663,43 @@ app.get('/api/alumnos/buscar/:matricula', verificarAutenticacion, (req, res) => 
 });
 
 // ========================================
+// API ENDPOINTS - ADMIN
+// ========================================
+
+app.get('/api/admin/alumnos', verificarAutenticacion, (req, res) => {
+    if (req.session.usuario.tipo !== 'admin') {
+        return res.status(403).json({ success: false, message: "Acceso denegado" });
+    }
+    const query = `
+        SELECT a.*, u.nombre, u.correo 
+        FROM alumnos a 
+        JOIN usuarios u ON a.usuario_id = u.id
+    `;
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: "Error al obtener alumnos" });
+        res.json({ success: true, alumnos: results });
+    });
+});
+
+app.get('/api/admin/grupos', verificarAutenticacion, (req, res) => {
+    if (req.session.usuario.tipo !== 'admin') {
+        return res.status(403).json({ success: false, message: "Acceso denegado" });
+    }
+    const query = "SELECT DISTINCT grupo FROM alumnos WHERE grupo IS NOT NULL";
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: "Error al obtener grupos" });
+        res.json({ success: true, grupos: results.map(r => r.grupo) });
+    });
+});
+
+app.get('/admin', verificarAutenticacion, (req, res) => {
+    if (req.session.usuario.tipo !== 'admin') {
+        return res.redirect('/index');
+    }
+    res.render('admin', { usuario: req.session.usuario });
+});
+
+// ========================================
 // API ENDPOINTS - PROGRESO
 // ========================================
 
@@ -674,16 +717,18 @@ app.get('/api/progreso', verificarAutenticacion, (req, res) => {
 
             const { exp, nivel, racha_actual, mejor_racha } = results[0];
 
-            res.json({
-                success: true,
-                usuario: req.session.usuario,
-                estadisticas: {
-                    exp,
-                    nivel,
-                    racha: racha_actual,
-                    mejorRacha: mejor_racha,
-                    tareasCompletadas: 0
-                }
+            db.query('SELECT COUNT(*) as completadas FROM tareas WHERE estado = "completada"', (errT, resT) => {
+                res.json({
+                    success: true,
+                    usuario: req.session.usuario,
+                    estadisticas: {
+                        exp,
+                        nivel,
+                        racha: racha_actual,
+                        mejorRacha: mejor_racha,
+                        tareasCompletadas: resT[0].completadas || 0
+                    }
+                });
             });
         }
     );

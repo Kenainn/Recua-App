@@ -38,11 +38,16 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Evaluaciones", emoji: "📊", page: "/evaluaciones" },
   ];
 
+  const adminOptions = [
+    { name: "Admin Panel", emoji: "🛡️", page: "/admin" },
+    { name: "Materias", emoji: "📚", page: "/materias" },
+    { name: "Alumnos", emoji: "👥", page: "/admin" },
+  ];
+
   function actualizarMenu() {
-    const menuOptions =
-      userRole === "profesor"
-        ? [...commonOptions, ...teacherOptions]
-        : commonOptions;
+    let menuOptions = commonOptions;
+    if (userRole === "profesor") menuOptions = [...commonOptions, ...teacherOptions];
+    if (userRole === "admin") menuOptions = adminOptions;
 
     const menuList = sidebar.querySelector("ul");
     if (!menuList) return;
@@ -73,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutLi.addEventListener("click", cerrarSesion);
     menuList.appendChild(logoutLi);
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   // Función para cerrar sesión
@@ -176,6 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error('Error al actualizar estadísticas:', err);
     }
   }
+  // No llamar aquí para exportar a global si es necesario
+  window.updateStats = updateStats;
   updateStats();
 
   /* ==========================
@@ -204,12 +211,16 @@ document.addEventListener("DOMContentLoaded", () => {
           div.style.cursor = "pointer";
 
           const fecha = new Date(tarea.fecha_entrega).toLocaleDateString('es-MX');
+          const esCompletada = tarea.estado === 'completada';
 
           div.innerHTML = `
             <strong>${tarea.titulo}</strong><br>
             <span>${tarea.materia_nombre || 'Sin materia'}</span><br>
             <small>${fecha}</small>
-            <button class="btn-complete" onclick="completarTarea(${tarea.id})" style="margin-top:5px; padding:5px 10px; background:#4CAF50; color:white; border:none; borderRadius:5px; cursor:pointer;">Entregar</button>
+            ${esCompletada
+              ? '<div style="color:green; font-weight:bold; margin-top:5px;">✅ Entregada</div>'
+              : `<button class="btn-complete" onclick="completarTarea(${tarea.id})" style="margin-top:5px; padding:5px 10px; background:#4CAF50; color:white; border:none; borderRadius:5px; cursor:pointer;">Entregar</button>`
+            }
           `;
           tasksTodayContainer.appendChild(div);
         });
@@ -228,9 +239,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(`/api/tareas/${id}/completar`, { method: 'PUT' });
       const data = await res.json();
       if (data.success) {
-        alert('¡Tarea entregada! Has ganado 50 XP.');
+        // alert('¡Tarea entregada! Has ganado 50 XP.');
         cargarTareasHoy();
         updateStats();
+        cargarProximasTareas(); // También actualizar próximas por si acaso
       } else {
         alert('Error al entregar tarea');
       }
@@ -274,10 +286,18 @@ document.addEventListener("DOMContentLoaded", () => {
       upcomingTasks.innerHTML = '';
 
       if (data.success && data.tareas.length > 0) {
-        // Mostrar las próximas 3 tareas pendientes
-        const pendientes = data.tareas.filter(t => t.estado !== 'completada').slice(0, 3);
-        if (pendientes.length > 0) {
-          pendientes.forEach(tarea => {
+        // Obtener fecha de hoy local para filtrar (YYYY-MM-DD)
+        const now = new Date();
+        const hoy = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        // Mostrar próximas tareas pendientes que NO sean de hoy
+        const pendientesFuturas = data.tareas.filter(t => {
+          const fechaTarea = new Date(t.fecha_entrega).toISOString().split('T')[0];
+          return t.estado !== 'completada' && fechaTarea !== hoy;
+        }).slice(0, 3);
+
+        if (pendientesFuturas.length > 0) {
+          pendientesFuturas.forEach(tarea => {
             const li = document.createElement('li');
             li.innerHTML = `<span style="color:#ff9800;">•</span> ${tarea.titulo} - ${tarea.materia_nombre || 'Sin materia'}`;
             upcomingTasks.appendChild(li);
@@ -312,7 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const color = colores[index % colores.length];
           li.innerHTML = `
             <span style="background:${color}; border-radius:50%; display:inline-block; width:10px; height:10px;"></span> 
-            ${materia.nombre} - ${materia.nombre_profesor || 'Sin profesor'}
+            ${materia.nombre}
           `;
           mySubjects.appendChild(li);
         });
@@ -486,6 +506,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // En este caso, ya que materias.ejs tiene su propio script completo, eliminamos la lógica duplicada de aquí
   // para evitar conflictos.
 
-  // Inicializar Lucide icons
-  lucide.createIcons();
+  // Inicializar Lucide icons si están disponibles
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  } else {
+    console.warn('Lucide icons no está cargado');
+  }
 });

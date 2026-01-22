@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración | Recua</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <button id="toggleSidebar" class="sidebar-toggle"><i data-lucide="menu"></i></button>
+        <h1>Panel de Administración</h1>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <ul></ul>
+        <hr>
+        <div class="user-sidebar">
+            <div class="user-main" id="userMain">
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">🛡️</div>
+                <p>
+                    <%= usuario.nombre %>
+                </p>
+            </div>
+            <div class="user-info-sidebar" id="userInfoSidebar">
+                <p>
+                    <%= usuario.correo %>
+                </p>
+                <button id="logout-btn">Cerrar Sesión</button>
+            </div>
+        </div>
+        <button id="closeSidebar" class="sidebar-close">✖ Ocultar</button>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+        <section class="admin-stats horizontal-layout" style="margin-bottom: 24px;">
+            <div class="card white-card horizontal-card">
+                <div class="stat horizontal">
+                    <i data-lucide="users" style="color:var(--primary);"></i>
+                    <div><span id="total-alumnos">0</span> Alumnos Registrados</div>
+                </div>
+            </div>
+            <div class="card white-card horizontal-card">
+                <div class="stat horizontal">
+                    <i data-lucide="layout" style="color:orange;"></i>
+                    <div><span id="total-grupos">0</span> Grupos Activos</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-actions horizontal-layout" style="margin-bottom: 24px;">
+            <div class="card white-card" style="flex: 2;">
+                <h2>Registrar Nueva Materia (Acción Rápida)</h2>
+                <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px;">
+                    <input type="text" id="admin-materia-nombre" placeholder="Nombre de la materia"
+                        style="padding:10px; border-radius:8px; border:1px solid #ccc;">
+                    <textarea id="admin-materia-desc" placeholder="Descripción"
+                        style="padding:10px; border-radius:8px; border:1px solid #ccc;"></textarea>
+                    <button id="admin-save-materia" class="btn-green">Crear Materia</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-lists">
+            <div class="card white-card">
+                <h2>Alumnos por Grupo</h2>
+                <select id="grupo-filter" style="margin: 16px 0; padding:8px; border-radius:8px; width: 200px;">
+                    <option value="all">Todos los grupos</option>
+                </select>
+                <div class="table-wrapper">
+                    <table class="evaluaciones-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Matrícula</th>
+                                <th>Grupo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-alumnos-list">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="./js/scripts.js"></script>
+    <script>
+        async function cargarDatosAdmin() {
+            try {
+                const [resA, resG] = await Promise.all([
+                    fetch('/api/admin/alumnos'),
+                    fetch('/api/admin/grupos')
+                ]);
+                const dataA = await resA.json();
+                const dataG = await resG.json();
+
+                if (dataA.success) {
+                    document.getElementById('total-alumnos').textContent = dataA.alumnos.length;
+                    renderAlumnos(dataA.alumnos);
+                }
+
+                if (dataG.success) {
+                    document.getElementById('total-grupos').textContent = dataG.grupos.length;
+                    const filter = document.getElementById('grupo-filter');
+                    dataG.grupos.forEach(g => {
+                        const opt = document.createElement('option');
+                        opt.value = g;
+                        opt.textContent = g;
+                        filter.appendChild(opt);
+                    });
+
+                    filter.addEventListener('change', () => {
+                        const filtered = dataA.alumnos.filter(a => filter.value === 'all' || a.grupo === filter.value);
+                        renderAlumnos(filtered);
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderAlumnos(alumnos) {
+            const list = document.getElementById('admin-alumnos-list');
+            list.innerHTML = alumnos.map(a => `
+                <tr>
+                    <td>${a.nombre}</td>
+                    <td>${a.correo}</td>
+                    <td>${a.matricula || 'N/A'}</td>
+                    <td>${a.grupo || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('admin-save-materia').addEventListener('click', async () => {
+            const nombre = document.getElementById('admin-materia-nombre').value;
+            const desc = document.getElementById('admin-materia-desc').value;
+
+            if (!nombre) return alert('Nombre obligatorio');
+
+            const res = await fetch('/api/materias', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, descripcion: desc, horario: "Admin Default | 00:00 - 00:00" })
+            });
+
+            if ((await res.json()).success) {
+                alert('Materia creada');
+                location.reload();
+            }
+        });
+
+        cargarDatosAdmin();
+    </script>
+</body>
+
+</html>
